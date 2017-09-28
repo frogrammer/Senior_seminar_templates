@@ -21,9 +21,9 @@
 
 % --- Author Metadata here ---
 %%% REMEMBER TO CHANGE THE SEMESTER AND YEAR AS NEEDED
-\conferenceinfo{UMM CSci Senior Seminar Conference, December 2015}{Morris, MN}
+\conferenceinfo{UMM CSci Senior Seminar Conference, December 2017}{Morris, MN}
 
-\title{UMM CSci Senior Seminar LaTeX template}
+\title{Point-of-Interest Recommender Systems in Location-Base Social Networks}
 
 \numberofauthors{1}
 
@@ -34,31 +34,16 @@
 % affiliation/address with \affaddr, and tag the
 % e-mail address with \email.
 \alignauthor
-Chris S. Student\\
+Myeongjae Song\\
 	\affaddr{Division of Science and Mathematics}\\
 	\affaddr{University of Minnesota, Morris}\\
 	\affaddr{Morris, Minnesota, USA 56267}\\
-	\email{cssxxxx00000@morris.umn.edu}
+	\email{songx823@morris.umn.edu}
 }
 
 \maketitle
 \begin{abstract}
-This paper provides a sample of a \LaTeX\ document which conforms,
-somewhat loosely, to the formatting guidelines for the University of
-Minnesota, Morris, Computer Science Senior Seminar proceedings.
-It is based heavily on (and takes material directly from) a similar document 
-illustrating the format of the ACM SIG Proceedings, which we have based our
-proceedings format on.
-
-The original ACM document tried to include
-\begin{quote}
-every imaginable sort
-of ``bells and whistles", such as a subtitle, footnotes on
-title, subtitle and authors, as well as in the text, and
-every optional component (e.g. Acknowledgments, Additional
-Authors, Appendices), not to mention examples of
-equations, theorems, tables and figures.
-\end{quote}
+``TBA"
 
 We've removed many of the more esoteric tricks here because either
 they'll never be used (e.g., multiple authors) or are used \emph{very}
@@ -107,7 +92,108 @@ proceedings paper, rather than with giving rigorous descriptions
 or explanations of such commands. Section~\ref{sec:body} introduces the main
 examples of formatting, and Section~\ref{sec:conclusions} wraps things up. 
 
-\section{The {\secit Body} of The Paper}
+\section{Backgrounds}
+\label{sec:backgrounds}
+
+TBA
+
+\section{Factoring Personalized Markov Chain and its improvements}
+\label{sec:fpmc}
+
+As we have discussed in section \ref{sec:backgrounds}, MC and MF based recommender systems
+have fairly distinct characteristics from each other. In this section, we will study a model called 
+Factoring Personalized Markov Chain (FPMC) that incorporates MF into MC, and then its 
+enhancements specializing in LSBN data properties.
+
+\subsection{Formalizaion}
+\label{sec:typeChangesSpecialChars}
+
+Before we dive into the details, let us introduce the notation used in this paper. 
+Let $U$ be a set of users and $L$ be a set of locations. For each user $u$ in $U$, 
+we know their check-in history set \begin{math}L^t_u\end{math} where $t$ is a timestamp 
+of the user visit. Our goal now is given the user check-in data 
+\begin{math}L^1_u,...,L^t_u\end{math}, recommend a next location to 
+a user $u$ at time $t + 1$.
+
+\subsection{FPMC}
+\label{sec:typeChangesSpecialChars}
+
+Even though MC based recommender systems were widely studied and used because of 
+its capacity to capture sequential data, it lacks the personalization feature to distinguish each user. 
+MF also has its weakness in processing sequential information since it is often completely ignored 
+to focus on the general taste of each user. The weakness is particularly problematic in LBSN. 
+In LBSN, sequential information plays a huge role in that there is a strong connection 
+between recently visited locations and future locations. For instance, people are likely to visit 
+cinemas or bars after restaurants. However, a recommender system with no sequential awareness 
+may recommend another restaurant to a user who just check-ined a restaurant; this is not ideal. 
+To take advantage of both MF and MC models, Rendle et al. [2010] proposes factorizing personalized 
+Markov chains (FPMC).
+
+How does FPMC combine these two different techniques? The most straightforward solution that 
+we can think of is having a personalized MC per user. Figure 3 shows four different transition matrices for each user. 
+? entries mean we have no data 
+to estimate the probability of the transition. As we can observe from the matrices, simply using 
+personalized transition matrices produces poor estimations. We just do not have enough data from
+each user. This is the place where the ideas of 
+MF can be applied. By stacking all transition matrices of users, we can get a transition cube or tensor A. 
+This is the essence of FPMC. Figure 4 represents the tensor for the same data from figure 3. 
+Unlike the naive personalization MC approach, a factored tensor solves the sparsity problem and 
+still has its personalization feature for individual users.
+
+\begin{figure}
+\psfig{file=Figure4(b).pdf,width=3in}
+\caption{The inter check-in distance in km}
+\label{fig:onlyOne}
+\end{figure}
+
+\subsection{FPMC-LR}
+\label{sec:typeChangesSpecialChars}
+
+FPMC successfully incorporates the information of the personalized Markov chain 
+by combining MF and MC in CF. However, it overlooks another noticeable property 
+of the LBSN datasets, localized region constraint. The figure ~\ref{fig:onlyOne}  
+reports the distance of inter check-ins in Gowalla and Foursquare. It shows that 
+more than 75\% of inter check-ins from Foursquare and 80\% of inter check-ins 
+from Gowalla happened within 10 km. Only less than 5\% of inter check-ins occur 
+more than 100km both in Foursquare and Gowalla. The observation on the LBSN 
+shows the trend that users tend to check in places close to their previous check-ins, 
+but the FPMC does not really make use of this potentially useful trend.
+
+(Intro to FPMC-LR non-tech) To add the ability to use localized region constraint 
+information into the existing personalized POI Markov chain, Cheng et al. [2013] 
+introduces a model called FPMC-LR which combines FPMC model with localized 
+region constraints to provide accurate successive POI recommendation in LBSNs. 
+Because FPMC-LR only takes into account nearby candidate locations depending 
+on where the users are, it reduces the computational costs and noisy information. 
+Also, it results in more accurate predications as we will see in [section result].
+
+(Math part) FPMC-LR model has a similar setting as FPMC since it is an improvement 
+over it. Just like in FPMC, the fundamental goal of FPMC-LR is to give the most suitable 
+location recommendation for user $u$ at time $t + 1$, given a sequence of check-ins. 
+In other words, we need to calculate the probability of a user $u$ to visit a location $l$ at time $t$:
+\begin{equation}
+	x_{u,i,l}=p(l \in L_u^t | i \in L_u^{t-1})
+\label{eq:summation}
+\end{equation}
+The main difference between FPMC and FPMC-LR is in their transition tensor. As we saw earlier, in FPMC, the model takes into account all possible locations for each user, so the tensor looks like: 
+\begin{equation}
+	\chi \in [0, 1]^{|U| \times |L| \times |L|}
+\label{eq:summation}
+\end{equation}
+In FPMC-LR, the model only considers neighbor locations for each location l for each user. 
+The tensor transition in FPMC-LR looks like:
+\begin{equation}
+	\chi \in [0, 1]^{|U| \times |L| \times |N_d(L)|}
+\label{eq:summation}
+\end{equation}
+The neighbor locations \begin{math}N_d(L)\end{math} are calculated by Haversine formula, 
+which is used to find the shortest distance between two points on the surface of a sphere. 
+In this case, we assume the earth is a roughly sphere. After applying several steps of ranking techniques, 
+we can get the final probability \begin{math}x_u,t,l\end{math}.
+
+
+
+\section{Body}
 \label{sec:body}
 
 Typically, the body of a paper is organized
