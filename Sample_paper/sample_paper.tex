@@ -198,6 +198,28 @@ which is used to find the shortest distance between two points on the surface of
 In this case, we assume the earth is a roughly sphere. After applying several steps of ranking techniques, 
 we can get the final probability \begin{math}x_u,t,l\end{math}.
 
+\subsection{TAD-FPMC}
+\label{sec:typeChangesSpecialChars}
+
+FPMC-LR is a very successful model for POI recommendation in terms of performance and efficiency 
+as we will discuss in later section; it incorporates sequential data with personalization and locality consideration. 
+However, there is a still room for improvement. Li et al. [2017] points out that FPMC-LR approach simply captures 
+the consecutive ordering relations in lieu of considering complex user behavior over time. Take college students, 
+for example. Students have morning classes, afternoon classes, or both in one day. When they have morning classes, 
+some of them have breakfast at a brunch café after class. When they have afternoon classes, some of them go 
+for a drink at a bar. Simply combining them as one sequential pattern is clearly not sufficient (e.x. recommending 
+for a drink at a bar after 8:00AM class). In other words, just recognizing sequential data such as the pattern is not 
+enough for capturing the differences in regular periodic pattern.
+
+To make the system consider time-varying behavioral trends, Li et al. [2017] suggests time-aware FPMC (TA-FPMC) 
+model, which is an improvement over FPMC-LR model. In section 2-1, Rendle et al. [2010] uses third order tensor to 
+construct a personalized Markov chain. TA-FPMC takes a similar approach. Instead of a third order tensor of 
+user-location-location, it forms a fourth order tensor by adding a time factor. Now, the transition tensor looks like: 
+There is another statistical characteristic of LBSN data that has not got much attention, the time gap between 
+two successive check-ins. The LBSN data shows that many of two successive check-ins span a large time gap 
+like a year. Base on the assumption that these successive check-ins with large time gaps do not tell much, 
+Li et al. [2017] introduces another factor D(delta t) to take into account the time-decaying effect. 
+The final model with all the considerations is called TAD-FPMC.
 
 
 \section{Body}
