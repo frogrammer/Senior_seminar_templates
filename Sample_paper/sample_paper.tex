@@ -23,7 +23,7 @@
 %%% REMEMBER TO CHANGE THE SEMESTER AND YEAR AS NEEDED
 \conferenceinfo{UMM CSci Senior Seminar Conference, December 2017}{Morris, MN}
 
-\title{Point-of-Interest Recommender Systems in Location-Base Social Networks}
+\title{Point-of-Interest Recommendation Systems in Location-Based Social Networks}
 
 \numberofauthors{1}
 
@@ -44,11 +44,8 @@ Myeongjae Song\\
 \maketitle
 \begin{abstract}
 ``TBA"
+\emph{This will be gone (hopefully)}
 
-We've removed many of the more esoteric tricks here because either
-they'll never be used (e.g., multiple authors) or are used \emph{very}
-rarely (e.g., appendices). Refer to the original ACM document for more
-of those fancy examples.
 % The current paper format *only* allows inline comments using the todo
 % macro. That's kind of a bummer, and it would be neat if someone figured
 % out how to change the acmconf style to allow this. I suspect it isn't *hard*
@@ -56,41 +53,51 @@ of those fancy examples.
 \todo[inline]{Needs more work}
 \end{abstract}
 
-\keywords{ACM proceedings, \LaTeX, text tagging}
+\keywords{Recommendation Systems, Point-of-Interest Recommendation, Location-Based Social Networks}
 
 \section{Introduction}
 \label{sec:introduction}
 
-The \textit{proceedings} are the records of a conference, and conference
-editors like ACM seek to give their conference by-products a uniform,
-high-quality appearance. We also would like our proceedings to look highly
-professional, so we're borrowing heavily from the ACM formatting guidelines.
-These include some
-rigid requirements for the format of the proceedings documents: there
-is a specified format (balanced  double columns), a specified
-set of fonts (Arial or Helvetica and Times Roman) in
-certain specified sizes (for instance, 9 point for body copy),
-a specified live area (18 $\times$ 23.5 cm [7" $\times$ 9.25"]) centered on
-the page, specified size of margins (2.54cm [1"] top and
-bottom and 1.9cm [.75"] left and right; specified column width
-(8.45cm [3.33"]) and gutter size (.083cm [.33"]).
+Nowadays, location-based social networks (LBSN), such as \emph{Facebook places, Tinder},  and \emph{Yelp}, 
+have been gaining a lot of attention with the widespread use of smartphones embedded with the 
+global positioning system (GPS). Even though LBSN are relatively new compared to 
+the traditional social networking services, millions of active users use the platform on a daily basis voluntarily sharing 
+their location information. Many of these LBSN allow users to ``check-in" 
+places like a restaurant or cinema; we call these checked-in places the points of interests (POI) 
+of the users. Users can share videos, pictures, or reviews about the places via this ``check-in" 
+feature. Based on the collected user data, LBSN provide POI recommendations. POI recommendation 
+is very important for LBSN for two reasons. First, users are more likely use the platform and check-in places 
+for their own benefits if it gives accurate predictions on places where users visit next. 
+Second, it allows the advertisers launch advertisements for target user group. Therefore, 
+accurate POI recommendation is crucial for the success of LBSN.
 
-\todo[inline, color=green]{I really like this section.}
+Even though POI recommendation is a type of recommendation system, it has distinct characteristics 
+mainly due to its geographical nature. For instance, recommending a movie is a fairly different task from 
+recommending a place. A movie recommendation system can recommend any movie, but a POI recommendation 
+system cannot just recommend a sushi restaurant in Tokyo for a user in Minnesota. The following are 
+meaningful differences between conventional recommendations and POI recommendation:
 
-The good news is, with only a handful of manual
-settings,\footnote{One of these, the \texttt{\textbackslash alignauthor} command, 
-you have
-already used; another, \texttt{\textbackslash balancecolumns} will
-be used in your very last run of \LaTeX\ to ensure
-balanced column heights on the last page.} the \LaTeX\ document
-class file handles all of this for you.
+\begin{itemize}
+\item[--] The types of checked-in place are highly related to the time period. Figure 1 shows check-in data in 
+NYC from a LBSN (Foursquare) over different hours of a day. The number of check-ins clearly varies depending 
+on the time.
+\item[--] People are likely to visit nearby places because of geographical limitation. Not many people are willing 
+to fly to Japan from the US just for a nice sushi restaurant.
+\item[--] The transition between POI is strongly affected by the user's own preference. Li et al. [2017] refers this as a long-term individual preference. For instance, some people go to the gym after work, but some people go home right away after work. 
+\item[--] User's next location is highly related to the user's current location. We would call this sequential feature of POI recommendation. 
+\end{itemize}
 
-The remainder of this document is concerned with showing, in
-the context of an ``actual'' document, the \LaTeX\ commands
-specifically available for denoting the structure of a
-proceedings paper, rather than with giving rigorous descriptions
-or explanations of such commands. Section~\ref{sec:body} introduces the main
-examples of formatting, and Section~\ref{sec:conclusions} wraps things up. 
+Traditionally, matrix factorization (MF) or Markov chain (MC) have been popular techniques for producing recommendations. 
+Because of the known drawbacks of each model, Rendle et al. [2010] proposes factorizing personalized 
+Markov chains (FPMC), which the combination of MC and MF techniques. FPMC is a robust system, 
+but it is a genetic model and not designed for POI recommendations. To capture the locality feature of 
+POI recommendations, Cheng et al. [2013] suggests FPMC-LR method. And, Li et al. [2017] proposes 
+TAD-FPMC, which is an improvement over FPMC-LR.
+
+In section 2, we are going to cover general and mathematical backgrounds in recommendation systems 
+to understand the proposed models. Then in section 3, we will explore the proposed approaches in detail. 
+In section 4, we will compare the accuracy of different recommendation techniques: FPMC, FPMC-LR, and TAD-FPMC. 
+Finally, we will conclude the paper in section 5.
 
 \section{Backgrounds}
 \label{sec:backgrounds}
