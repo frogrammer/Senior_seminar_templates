@@ -90,7 +90,7 @@ to fly to Japan from the US just for a nice sushi restaurant.
 Traditionally, matrix factorization (MF) or Markov chain (MC) have been popular techniques for producing recommendations. 
 Because of the known drawbacks of each model, Rendle et al. [2010] proposes factorizing personalized 
 Markov chains (FPMC), which the combination of MC and MF techniques. FPMC is a robust system, 
-but it is a genetic model and not designed for POI recommendations. To capture the locality feature of 
+but it is a generic model and not designed for POI recommendations. To capture the locality feature of 
 POI recommendations, Cheng et al. [2013] suggests FPMC-LR method. And, Li et al. [2017] proposes 
 TAD-FPMC, which is an improvement over FPMC-LR.
 
@@ -102,7 +102,34 @@ Finally, we will conclude the paper in section 5.
 \section{Backgrounds}
 \label{sec:backgrounds}
 
-TBA
+Markov chain is a statistical model that represents transitional probabilities among different states. 
+In other words, it is a map of transitions from one state to another state. In the context of LBSN, 
+states represent different locations where users can visit. Figure * shows a simple Markov chain 
+model with two possible states: house (H) and school (S). The number labels on arrows represent 
+the probability of the transition to the indicated direction. In the figure, if the current state of the 
+user is H, the probability of the user going to S (going to school) is 70\% and the probability of the 
+using going to H again (staying at home) is 30\%. The diagram of states and transitions can also be 
+represented as a transition matrix as in figure *, which allows the mathematical analysis. One key 
+feature of the Markov chain is that predictions of future transitions are solely based on the present 
+system. Therefore, the previous iterations and future iterations are completely independent. 
+Just like the simply example above, we can easily imagine that Markov chain is directly applied to 
+POI recommendation systems but with tens of thousands of places instead of two places.
+
+In Linear Algebra, matrix factorization (MF) is a technique to factor a matrix as a product of multiple matrices. 
+When it is used in LBSN context, a realistic example would be a matrix of user x location 
+where each entry is the 5 star-based rating of the place like figure *. MF will factor this matrix 
+into two separate matrices, one for users and one for the locations. In this factorization, the 
+choice of d matters for its efficiency and accuracy, so it should be carefully chosen. Also, 0 
+entries are ignored in the factorization stage. With these two factored matrices, we can 
+calculate the predicted rating of the place p for user u: 
+
+A tensor is essentially a quantity which can represented by a magnitude, a direction, and 
+a dimension. Remember a vector is a quantity of a magnitude and a direction, and a scalar 
+is a quantity of a magnitude. So, a vector is actually a tensor of rank 1 and a scalar is a tensor 
+of rank 0. Simply put, a rank 2 tensor can be represented as a matrix, and higher rank tensors 
+are thought as multi-dimensional version of the matrix. For instance, we can stack matrices on 
+the top of one another to represent a 3 rank tensor. Figure * shows the visual representations of these tensors.
+
 
 \section{Factoring Personalized Markov Chain and its improvements}
 \label{sec:fpmc}
@@ -116,7 +143,7 @@ enhancements specializing in LSBN data properties.
 \label{sec:typeChangesSpecialChars}
 
 Before we dive into the details, let us introduce the notation used in this paper. 
-Let $U$ be a set of users and $L$ be a set of locations. For each user $u$ in $U$, 
+Let $U$ be a set of users and $L$ be a set of locations. For each user $u \in U$, 
 we know their check-in history set \begin{math}L^t_u\end{math} where $t$ is a timestamp 
 of the user visit. Our goal now is given the user check-in data 
 \begin{math}L^1_u,...,L^t_u\end{math}, recommend a next location to 
@@ -127,22 +154,22 @@ a user $u$ at time $t + 1$.
 
 Even though MC based recommender systems were widely studied and used because of 
 its capacity to capture sequential data, it lacks the personalization feature to distinguish each user. 
-MF also has its weakness in processing sequential information since it is often completely ignored 
-to focus on the general taste of each user. The weakness is particularly problematic in LBSN. 
-In LBSN, sequential information plays a huge role in that there is a strong connection 
-between recently visited locations and future locations. For instance, people are likely to visit 
-cinemas or bars after restaurants. However, a recommender system with no sequential awareness 
+MF also has its weakness in processing sequential information since it often ignores
+ the individual user's preference. The weakness is particularly problematic in LBSN. 
+As we have looked at in section \ref{sec:introduction}, sequential information plays a huge role in LBSN 
+in that there is a strong connection between recently visited locations and future locations. 
+A recommender system with no sequential awareness 
 may recommend another restaurant to a user who just check-ined a restaurant; this is not ideal. 
 To take advantage of both MF and MC models, Rendle et al. [2010] proposes factorizing personalized 
 Markov chains (FPMC).
 
 How does FPMC combine these two different techniques? The most straightforward solution that 
-we can think of is having a personalized MC per user. Figure 3 shows four different transition matrices for each user. 
+we can think of is having a personalized MC per user $u \in U$. Figure 3 shows four different transition matrices for each user. 
 ? entries mean we have no data 
 to estimate the probability of the transition. As we can observe from the matrices, simply using 
 personalized transition matrices produces poor estimations. We just do not have enough data from
 each user. This is the place where the ideas of 
-MF can be applied. By stacking all transition matrices of users, we can get a transition cube or tensor A. 
+MF can be applied. By stacking all transition matrices of users, we can get a transition cube or tensor $A$. 
 This is the essence of FPMC. Figure 4 represents the tensor for the same data from figure 3. 
 Unlike the naive personalization MC approach, a factored tensor solves the sparsity problem and 
 still has its personalization feature for individual users.
@@ -166,7 +193,7 @@ more than 100km both in Foursquare and Gowalla. The observation on the LBSN
 shows the trend that users tend to check in places close to their previous check-ins, 
 but the FPMC does not really make use of this potentially useful trend.
 
-(Intro to FPMC-LR non-tech) To add the ability to use localized region constraint 
+To add the ability to use localized region constraint 
 information into the existing personalized POI Markov chain, Cheng et al. [2013] 
 introduces a model called FPMC-LR which combines FPMC model with localized 
 region constraints to provide accurate successive POI recommendation in LBSNs. 
@@ -174,7 +201,7 @@ Because FPMC-LR only takes into account nearby candidate locations depending
 on where the users are, it reduces the computational costs and noisy information. 
 Also, it results in more accurate predications as we will see in [section result].
 
-(Math part) FPMC-LR model has a similar setting as FPMC since it is an improvement 
+FPMC-LR model has a similar setting as FPMC since it is an improvement 
 over it. Just like in FPMC, the fundamental goal of FPMC-LR is to give the most suitable 
 location recommendation for user $u$ at time $t + 1$, given a sequence of check-ins. 
 In other words, we need to calculate the probability of a user $u$ to visit a location $l$ at time $t$:
