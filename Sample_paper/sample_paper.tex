@@ -63,19 +63,19 @@ Nowadays, location-based social networks (LBSN), such as \emph{Facebook places, 
 have been gaining a lot of attention with the widespread use of smartphones embedded with the 
 global positioning system (GPS). Even though LBSN are relatively new compared to 
 the traditional social networking services, millions of active users use the platform on a daily basis voluntarily sharing 
-their location information. Many of these LBSN allow users to ``check-in" 
-places like a restaurant or cinema; we call these checked-in places the points of interests (POI) 
+their location information. Many of these LBSNs allow users to ``check-in" 
+places like a restaurant or cinema; we call these checked-in places the points of interest (POI) 
 of the users. Users can share videos, pictures, or reviews about the places via this ``check-in" 
-feature. Based on the collected user data, LBSN provide POI recommendations. POI recommendation 
-is very important for LBSN for two reasons. First, users are more likely use the platform and check-in places 
-for their own benefits if it gives accurate predictions on places where users visit next. 
-Second, it allows the advertisers launch advertisements for target user group. Therefore, 
-accurate POI recommendation is crucial for the success of LBSN.
+feature. Based on the collected user data, LBSNs provide POI recommendations. POI recommendation 
+is very important for LBSNs for two reasons. First, users are more likely use the platform and check-in places 
+for their own benefit if it gives accurate predictions on places where users visit next time. 
+Second, it allows the advertisers launch advertisements for target user groups. Therefore, 
+accurate POI recommendation is crucial for the success of LBSNs.
 
 Even though POI recommendation is a type of recommendation system, it has distinct characteristics 
 mainly due to its geographical nature. For instance, recommending a movie is a fairly different task from 
 recommending a place. A movie recommendation system can recommend any movie, but a POI recommendation 
-system cannot just recommend a sushi restaurant in Tokyo for a user in Minnesota. The following are 
+system should not just recommend a sushi restaurant in Tokyo for a user in Minnesota. The following are 
 meaningful differences between conventional recommendations and POI recommendation:
 
 \begin{itemize}
@@ -85,22 +85,23 @@ on the time.
 \item[--] People are likely to visit nearby places because of geographical limitation. Not many people are willing 
 to fly to Japan from the US just for a nice sushi restaurant.
 \item[--] The transition between POI is strongly affected by the user's own preference. Li et al. [2017] refers this as a long-term individual preference. For instance, some people go to the gym after work, but some people go home right away after work. 
-\item[--] User's next location is highly related to the user's current location. We would call this sequential feature of POI recommendation. 
+\item[--] A user's next location is highly related to the user's current location. We would call this the sequential feature of POI recommendation. 
 \end{itemize}
 
 \begin{figure}
 \centering
 \psfig{file=NYC_checkIn.pdf,width=3.5in}
-\caption{Relationship between time interval and check-in location category.}
+\caption{Relationship between time interval and check-in location category in NYC.}
 \label{fig:NYC_checkIn}
 \end{figure}
 
-Traditionally, matrix factorization (MF) or Markov chain (MC) have been popular techniques for producing recommendations. 
+Traditionally, matrix factorization (MF) or Markov chain (MC) have been popular techniques for producing recommendations.
+The ideas behind MF and MC will be explored in more detail in section \ref{sec:backgrounds}. 
 Because of the known drawbacks of each model, Rendle et al. [2010] proposes factorizing personalized 
-Markov chains (FPMC), which the combination of MC and MF techniques. FPMC is a robust system, 
+Markov chains (FPMC), which is the combination of MC and MF techniques. FPMC is a robust system, 
 but it is a generic model and not designed for POI recommendations. To capture the locality feature of 
-POI recommendations, Cheng et al. [2013] suggests FPMC-LR method. And, Li et al. [2017] proposes 
-TAD-FPMC, which is an improvement over FPMC-LR.
+POI recommendations, Cheng et al. [2013] suggests FPMC-LR method where LR stands for localized regions. 
+And, Li et al. [2017] proposes time-aware FPMC with time decaying consideration called TAD-FPMC.
 
 In section 2, we are going to cover general and mathematical backgrounds in recommendation systems 
 to understand the proposed models. Then in section 3, we will explore the proposed approaches in detail. 
