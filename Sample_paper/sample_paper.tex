@@ -276,6 +276,47 @@ like a year. Base on the assumption that these successive check-ins with large t
 Li et al. [2017] introduces another factor $D(\Delta t)$ to take into account the time-decaying effect. 
 The final model with all the considerations is called TAD-FPMC.
 
+\section{Experiments}
+\label{sec:experiments}
+In the experiments, we will address the following questions: 1) How do the different POI recommendation 
+models perform in real LBSN data? 2) Why are distance constraint and temporal information important 
+factors in POI recommendation?
+
+\subsection{Datasets}
+\label{sec:datasets}
+The evaluation used data collected from Foursquare, a LBSN that provides POI recommendations based on 
+each user's preference. The data includes users' check-in data of New York City and Los Angeles from Jan. 
+2010 to June 2011. Li et al. [2017] divided available locations in the data into 249 categories. 
+The summary of the statistics is elaborated in Table 1. In Table 1, \emph{tip} means comments or reviews on a 
+certain location written by other users.
+
+\subsection{Evaluation Metric}
+\label{metic}
+The main task for models is providing a list of top-N locations (the list contains N locations 
+ordered from the highest probability of user visit to the lowest). The recommendation is considered 
+correct if the user indeed visited a location in the top-N list or the category of the user visit location 
+is in the top-N list. The evaluation metric is defined as:
+\begin{equation}
+	P@N = \frac{\textrm{the counts of correct predictions}} {\textrm{the total number of recommendation rounds}}
+\label{eq:P@N}
+\end{equation}
+
+
+\subsection{Comparison}
+\label{comparison}
+Figure * shows the performance comparison among different models of POI recommendation. 
+The x-axis represents the N value which is the number of recommended locations, and the y-axis 
+is the precision of the recommendation P@N. In both LA and NYC data, there is a huge gap 
+between generic models (MF and FPMC) and POI specific models (FPMC-LR and TAD-FPMC). 
+This verifies the importance of distance constraint and temporal information in POI recommendations. 
+Also, TAD-FPMC slightly outperforms FPMC-LR in both datasets. If we utilize additional enhancements 
+for TAD-FPMC, the performance improves significantly as we can see in Table .
+
+The experiments were run on a machine with a Core i7-6700K 4.0GHz 8HT and memory size of 32GB. 
+In terms of the efficiency, TAD-FPMC is shown to be the most efficient model with the running time of 
+3 hours compared to FPMC and FPMC-LR with 35 hours. The reduced dimensionality from the number of 
+locations to the number dimensionality improves the efficiency significantly.
+
 \section{Conclusions}
 \label{sec:conclusions}
 
