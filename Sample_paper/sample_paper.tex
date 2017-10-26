@@ -43,14 +43,17 @@ Myeongjae Song\\
 
 \maketitle
 \begin{abstract}
-``TBA"
-\emph{This will be gone (hopefully)}
-
-% The current paper format *only* allows inline comments using the todo
-% macro. That's kind of a bummer, and it would be neat if someone figured
-% out how to change the acmconf style to allow this. I suspect it isn't *hard*
-% but there are quite a few details that have to be sorted out in synchrony.
-\todo[inline]{Needs more work}
+The task of precise point-of-interest (POI) recommendation is a key to the success of 
+location-based social networks (LBSN) since it will attract more users and advertisers 
+to the platform. To achieve the POI recommendation task, many methods are proposed 
+and used in practice from genetic recommendation system methods to POI specific 
+algorithms. In this paper, we will analyze a novel recommendation technique named 
+factorized personalized Markov chain (FPMC) model, which is a combination of matrix 
+factorization and Markov chain models. We will also explore enhancements of FPMC 
+optimized for POI specific characteristics such as users' movement constraint and 
+complex behavior over time. Experimental results show POI specific methods outperform 
+generic recommendation models. It also verifies that the more POI characteristics a system incorporates, 
+the more accurate the prediction is.
 \end{abstract}
 
 \keywords{Recommendation Systems, Point-of-Interest Recommendation, Location-Based Social Networks}
@@ -202,91 +205,104 @@ that we will discuss more in next section.
 \section{Factoring Personalized Markov Chain and its improvements}
 \label{sec:fpmc}
 
-As we have discussed in section \ref{sec:backgrounds}, MC and MF based recommender systems
+As we have discussed in section \ref{sec:backgrounds}, MC and MF based recommendation systems
 have fairly distinct characteristics from each other. In this section, we will study a model called 
-Factoring Personalized Markov Chain (FPMC) that incorporates MF into MC, and then its 
-enhancements specializing in LSBN data properties.
+factorized personalized Markov chain (FPMC) that incorporates MF into MC, and its 
+enhancements specializing in LSBN specific data properties.
 
-\subsection{Formalizaion}
+\subsection{Formalization}
 \label{sec:typeChangesSpecialChars}
 
-Before we dive into the details, let us introduce the notation used in this paper. 
+Before we dive into the details of the algorithms, let us introduce the notation used in this paper. 
 Let $U$ be a set of users and $L$ be a set of locations. For each user $u \in U$, 
-we know their check-in history set \begin{math}L^t_u\end{math} where $t$ is a timestamp 
-of the user visit. Our goal now is given the user check-in data 
-\begin{math}L^1_u,...,L^t_u\end{math}, recommend a next location to 
-a user $u$ at time $t + 1$.
+we know their check-in history set \begin{math}L^t_u\end{math} where $t$ is the timestamp 
+of a user visit. Our goal now is, given the user check-in data 
+\begin{math}L^1_u,...,L^{t-1}_u\end{math}, recommend a next location to 
+a user $u$ at time $t$. This goal is roughly equivalent to finding the probability of $u$ 
+checking in location $l$ at time $t$, given a previous check-in location $i$ at time $t-1$:
+
+\begin{equation}
+	x_{u,i,l}=p(l \in L_u^t | i \in L_u^{t-1})
+\label{eq:goal}
+\end{equation}
 
 \subsection{FPMC}
 \label{sec:typeChangesSpecialChars}
 
-Even though MC based recommender systems were widely studied and used because of 
+Even though MC based recommendation systems were widely studied and used because of 
 its capacity to capture sequential data, it lacks the personalization feature to distinguish each user. 
-MF also has its weakness in processing sequential information since it often ignores
- the individual user's preference. The weakness is particularly problematic in LBSN. 
-As we have looked at in section \ref{sec:introduction}, sequential information plays a huge role in LBSN 
-in that there is a strong connection between recently visited locations and future locations. 
-A recommender system with no sequential awareness 
-may recommend another restaurant to a user who just check-ined a restaurant; this is not ideal. 
-To take advantage of both MF and MC models, Rendle et al. [2010] proposes factorizing personalized 
-Markov chains (FPMC).
+MF also has its weakness in processing sequential information since the order in a user's check-in sequence 
+is often ignored when prediction is calculated.
+In section \ref{sec:introduction}, we mentioned sequential information plays a huge role in LBSN 
+in that there is a strong connection between users' recently visited locations and future locations. 
+Imagine a POI recommendation system with no sequential awareness. 
+It may recommend a family restaurant to a user who just check-ined a restaurant; this is not ideal. 
+To take advantage of these two complementary models, Rendle et al. [2010] proposes FPMC.
 
-How does FPMC combine these two different techniques? The most straightforward solution that 
-we can think of is having a personalized MC per user $u \in U$. Figure \ref{fig:FPMC_naive} shows 
-four different transition matrices for each user. 
-? entries mean we have no data 
-to estimate the probability of the transition. As we can observe from the matrices, simply using 
-personalized transition matrices produces poor estimations. We just do not have enough data from
-each user. This is the place where the ideas of 
-MF can be applied. By stacking all transition matrices of users, we can get a transition cube or tensor $A$. 
-This is the essence of FPMC. Figure \ref{fig:FPMC_naive} represents the tensor for the same data from figure 
-\ref{fig:FPMC}. Unlike the naive personalization MC approach, a factored tensor solves the sparsity problem and 
-still has its personalization feature for individual users.
+First, let us think about what kind of recommendation model we aim to build. 
+We want a recommendation system that is aware of sequential pattern and personalized for each user.
+MC is good at recognizing sequential features, but it uses one general transition matrix for every user. 
+Then, the question is, can we create a personalized MC?
+A straightforward approach is having a personalized MC per user $u \in U$. 
+Figure \ref{fig:FPMC_naive} shows four different transition matrices for each user. 
+The question mark (?) entries mean we have no data to estimate the probability of the transition. The problem of these personalized 
+MC matrices is that they are often very sparse, so they result in poor estimations. We just do not have enough data from
+each user. This is the place where the ideas of MF can be applied. By stacking all transition matrices of users, 
+we can get a transition cube or tensor $\chi$. Now, we can factorize the tensor using a tensor factorization technique. 
+Factorizing this tensor $\chi$ produces four parameters: one rank-3 core tensor and three groups of matrices. Using an efficient tensor 
+factorization technique pairwise interaction tensor factorization (PITF), we get the following 
+estimation equation for the probability of user $u$ going to location $l$ from location $i$:
+
+\begin{equation}
+	\hat{x}_{u,i,l} := v_u^{U,L} \cdot v_l^{L,U} + v_l^{L,I} \cdot v_i^{I,L} + v_u^{U,I} \cdot v_i^{I,U}
+\label{eq:MF}
+\end{equation}
+
+This is the essence of FPMC method. To achieve the recommendation goal $\hat{x}_{u,i,l}$, we 
+construct a tensor containing MCs for users, and then we factorize the tensor into a rank-3 tensor 
+and matrices. Finally, we calculate the prediction by combining the corresponding entries of the
+factors. 
 
 \subsection{FPMC-LR}
 \label{sec:typeChangesSpecialChars}
 
-FPMC successfully incorporates the information of the personalized Markov chain 
-by combining MF and MC in CF. However, it overlooks another noticeable property 
-of the LBSN datasets, localized region constraint. The figure ~\ref{fig:onlyOne}  
-reports the distance of inter check-ins in Gowalla and Foursquare. It shows that 
-more than 75\% of inter check-ins from Foursquare and 80\% of inter check-ins 
-from Gowalla happened within 10 km. Only less than 5\% of inter check-ins occur 
-more than 100km both in Foursquare and Gowalla. The observation on the LBSN 
+FPMC successfully constructs a personalized MC for POI recommendation
+by combining ideas of MF and MC. However, it overlooks another noticeable property 
+of LBSN dataset, localized region constraint. According to check-in data from 
+Gowalla and Foursquare, more than 75\% of check-ins from Foursquare and 80\% of check-ins 
+from Gowalla happened within 10 km of the previously checked-in place. The observation on the LBSN data
 shows the trend that users tend to check in places close to their previous check-ins, 
-but the FPMC does not really make use of this potentially useful trend.
+but FPMC does not really make use of this potentially useful trend.
 
 To add the ability to use localized region constraint 
-information into the existing personalized POI Markov chain, Cheng et al. [2013] 
+information into the existing FPMC model, Cheng et al. [2013] 
 introduces a model called FPMC-LR which combines FPMC model with localized 
-region constraints to provide accurate successive POI recommendation in LBSNs. 
+region (LR) constraints to provide accurate successive POI recommendation in LBSNs. 
 Because FPMC-LR only takes into account nearby candidate locations depending 
-on where the users are, it reduces the computational costs and noisy information. 
-Also, it results in more accurate predications as we will see in [section result].
+on where the users currently are, it reduces the computational costs and noisy information. 
+Also, it results in more accurate predictions as we will see in section \ref{sec:experiments}.
 
-FPMC-LR model has a similar setting as FPMC since it is an improvement 
-over it. Just like in FPMC, the fundamental goal of FPMC-LR is to give the most suitable 
-location recommendation for user $u$ at time $t + 1$, given a sequence of check-ins. 
-In other words, we need to calculate the probability of a user $u$ to visit a location $l$ at time $t$:
-\begin{equation}
-	x_{u,i,l}=p(l \in L_u^t | i \in L_u^{t-1})
-\label{eq:summation}
-\end{equation}
-The main difference between FPMC and FPMC-LR is in their transition tensor. As we saw earlier, in FPMC, the model takes into account all possible locations for each user, so the tensor looks like: 
+FPMC-LR model has a similar setting to FPMC since it is an improvement 
+over FPMC. Just like FPMC, the fundamental goal of FPMC-LR is to give the most suitable 
+location recommendation for user $u$ at time $t$, given a sequence of check-in data. 
+In other words, we need to calculate $x_{u,i,l}$, which is the probability of a user $u$ to visit a location $l$ at time $t$,
+where $i$ is the user location at time $t-1$.
+The main difference between FPMC and FPMC-LR is in their transition tensor. As we saw earlier, FPMC takes into account 
+all possible locations for each user, so the tensor looks like: 
 \begin{equation}
 	\chi \in [0, 1]^{|U| \times |L| \times |L|}
 \label{eq:summation}
 \end{equation}
-In FPMC-LR, the model only considers neighbor locations for each location l for each user. 
+On the other hand, FPMC-LR only considers neighborhood locations of the previous check-in location $i$. 
 The tensor transition in FPMC-LR looks like:
 \begin{equation}
 	\chi \in [0, 1]^{|U| \times |L| \times |N_d(L)|}
 \label{eq:summation}
 \end{equation}
-The neighbor locations \begin{math}N_d(L)\end{math} are calculated by Haversine formula, 
+The set of neighborhood locations \begin{math}N_d(L)\end{math} is calculated by Haversine formula, 
 which is used to find the shortest distance between two points on the surface of a sphere. 
-In this case, we assume the earth is a roughly sphere. After applying several steps of ranking techniques, 
-we can get the final probability \begin{math}x_u,t,l\end{math}.
+In this case, we assume the earth is roughly a sphere. By applying the same tensor factorizing technique to 
+our tensor $\chi \in [0, 1]^{|U| \times |L| \times |N_d(L)|}$, we get the target probability $x_{u,i,l}$.
 
 \subsection{TAD-FPMC}
 \label{sec:typeChangesSpecialChars}
@@ -317,8 +333,8 @@ The final model with all the considerations is called TAD-FPMC.
 
 \section{Experiments}
 \label{sec:experiments}
-In the experiments, we will address the following questions: 1) How do the different POI recommendation 
-models perform in real LBSN data? 2) Why are distance constraint and temporal information important 
+In the experiments, we will address the following questions: 1) How do different POI recommendation 
+models perform in real LBSN data? 2) Why are distance constraint and temporal information particularly important 
 factors in POI recommendation?
 
 \subsection{Datasets}
@@ -359,7 +375,16 @@ locations to the number dimensionality improves the efficiency significantly.
 \section{Conclusions}
 \label{sec:conclusions}
 
-TBA
+In this paper, we have considered the task of point-of-interest (POI) recommendation in LBSNs 
+and introduced different approaches for accurate predictions. Factorized personalized Markov 
+chain (FPMC) model is an elegant method combining advantages of Markov chains and matrix factorization,
+but it was not designed to incorporate distinct characteristics of LBSN data. FPMC-LR is an enhancement 
+of FPMC by only considering nearby locations when calculating POI predictions. TAD-FPMC is a novel 
+POI recommendation system approach that captures complex user behavior over time in addition to inheriting strengths 
+of FPMC and FPMC-LR models. From experimental results conducted on Foursquare data, we conclude 
+POI recommendation specific approaches (FPMC-LR, TAD-FPMC) far outperform generic recommendation models such as FPMC.
+Additionally, TAD-FPMC produces better predictions than any other methods including FPMC-LR.
+
 
 \section*{Acknowledgments}
 \label{sec:acknowledgments}
