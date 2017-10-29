@@ -10,7 +10,8 @@
 \documentclass{sig-alternate}
 \usepackage{color}
 \usepackage[colorinlistoftodos]{todonotes}
-
+\usepackage{amsmath}
+\usepackage{subcaption}
 %%%%% Uncomment the following line and comment out the previous one
 %%%%% to remove all comments
 %%%%% NOTE: comments still occupy a line even if invisible;
@@ -43,17 +44,17 @@ Myeongjae Song\\
 
 \maketitle
 \begin{abstract}
-The task of precise point-of-interest (POI) recommendation is a key to the success of 
+The precise point-of-interest (POI) recommendation is key to the success of 
 location-based social networks (LBSN) since it will attract more users and advertisers 
 to the platform. To achieve the POI recommendation task, many methods are proposed 
-and used in practice from genetic recommendation system methods to POI specific 
-algorithms. In this paper, we will analyze a novel recommendation technique named 
+and used in practice from generic recommendation system methods to POI specific 
+algorithms. In this paper, we will analyze a novel recommendation technique, 
 factorized personalized Markov chain (FPMC) model, which is a combination of matrix 
 factorization and Markov chain models. We will also explore enhancements of FPMC 
 optimized for POI specific characteristics such as users' movement constraint and 
 complex behavior over time. Experimental results show POI specific methods outperform 
 generic recommendation models. It also verifies that the more POI characteristics a system incorporates, 
-the more accurate the prediction is.
+the more accurate the prediction.
 \end{abstract}
 
 \keywords{Recommendation Systems, Point-of-Interest Recommendation, Location-Based Social Networks}
@@ -73,7 +74,7 @@ feature. Based on the collected user data, LBSNs provide POI recommendations. PO
 is very important for LBSNs for two reasons. First, users are more likely use the platform and check-in places 
 for their own benefit if it gives accurate predictions on places where users visit next time. 
 Second, it allows the advertisers launch advertisements for target user groups. Therefore, 
-accurate POI recommendation is crucial for the success of LBSNs.
+accurate POI recommendation is crucial for the success of LBSNs. \cite{Cheng:2013}
 
 Even though POI recommendation is a type of recommendation system, it has distinct characteristics 
 mainly due to its geographical nature. For instance, recommending a movie is a fairly different task from 
@@ -87,16 +88,6 @@ meaningful differences between conventional recommendations and POI recommendati
 \caption{Relationship between time interval and check-in location category in NYC.}
 \label{fig:NYC_checkIn}
 \end{figure}
-
-\begin{itemize}
-\item[--] The types of checked-in place are highly related to the time period. Figure \ref{fig:NYC_checkIn} shows check-in data in 
-NYC from a LBSN (Foursquare) over different hours of a day. The number of check-ins clearly varies depending 
-on the time.
-\item[--] People are likely to visit nearby places because of geographical limitation. Not many people are willing 
-to fly to Japan from the US just for a nice sushi restaurant.
-\item[--] The transition between POI is strongly affected by the user's own preference. Li et al. [2017] refers this as a long-term individual preference. For instance, some people go to the gym after work, but some people go home right away after work. 
-\item[--] A user's next location is highly related to the user's current location. We would call this the sequential feature of POI recommendation. 
-\end{itemize}
 
 \begin{figure*}
 \centering
@@ -112,13 +103,25 @@ to fly to Japan from the US just for a nice sushi restaurant.
 \label{fig:MarkovChain}
 \end{figure}
 
+\begin{itemize}
+\item[--] The types of checked-in place are highly related to the time period. Figure \ref{fig:NYC_checkIn} shows check-in data in 
+NYC from a LBSN (Foursquare) over different hours of a day. The number of check-ins clearly varies depending 
+on the time.
+\item[--] People are likely to visit nearby places because of geographical limitation. Not many people are willing 
+to fly to Japan from the US just for a nice sushi restaurant.
+\item[--] The transition between POI is strongly affected by the user's own preference. Li et al. \cite{Li:2017} refers this as a long-term individual preference. For instance, some people go to the gym after work, but some people go home right away after work. 
+\item[--] A user's next location is highly related to the user's current location. We would call this the sequential feature of POI recommendation. 
+\end{itemize}
+
+
+
 Traditionally, matrix factorization (MF) or Markov chain (MC) have been popular techniques for producing recommendations.
 The ideas behind MF and MC will be explored in more detail in section \ref{sec:backgrounds}. 
-Because of the known drawbacks of each model, Rendle et al. [2010] proposes factorizing personalized 
+Because of the known drawbacks of each model, Rendle et al. \cite{Rendle:2010:FPM} proposes factorizing personalized 
 Markov chains (FPMC), which is the combination of MC and MF techniques. FPMC is a robust system, 
 but it is a generic model and not designed for POI recommendations. To capture the locality feature of 
-POI recommendations, Cheng et al. [2013] suggests FPMC-LR method where LR stands for localized regions. 
-And, Li et al. [2017] proposes time-aware FPMC with time decaying consideration called TAD-FPMC.
+POI recommendations, Cheng et al. \cite{Cheng:2013} suggests FPMC-LR method where LR stands for localized regions. 
+And, Li et al. \cite{Li:2017} proposes time-aware FPMC with time decaying consideration called TAD-FPMC.
 
 In section 2, we are going to cover general and mathematical backgrounds in recommendation systems 
 to understand the proposed models. Then in section 3, we will explore the proposed approaches in detail. 
@@ -162,7 +165,7 @@ For instance, above matrices has two features: shopping? and food?. Once we find
 factors of A, we can make an estimation of unknown ratings. Let $q_l \in \mathbb{R}^f$ be a vector associated with location $l$, and 
 $p_u \in \mathbb{R}^f$ be a vector associated with user $u$. The elements of $q_l$ show how related location $l$ is to its factors, 
 and the elements of $p_u$ show how interested user $u$ is in the factors. If $r_{u,l}$ is the rating of location $l$ 
-from user $u$, we can find the estimate as:
+from user $u$, we can find the estimate via multiplying corresponding entries. ~\cite{Koren:2009}
 \begin{equation}
 	r_{u,l}= q_l^T p_u
 \label{eq:MF}
@@ -237,7 +240,7 @@ In section \ref{sec:introduction}, we mentioned sequential information plays a h
 in that there is a strong connection between users' recently visited locations and future locations. 
 Imagine a POI recommendation system with no sequential awareness. 
 It may recommend a family restaurant to a user who just check-ined a restaurant; this is not ideal. 
-To take advantage of these two complementary models, Rendle et al. [2010] proposes FPMC.
+To take advantage of these two complementary models, Rendle et al. \cite{Rendle:2010:FPM} proposes FPMC.
 
 First, let us think about what kind of recommendation model we aim to build. 
 We want a recommendation system that is aware of sequential pattern and personalized for each user.
@@ -251,12 +254,18 @@ each user. This is the place where the ideas of MF can be applied. By stacking a
 we can get a transition cube or tensor $\chi$. Now, we can factorize the tensor using a tensor factorization technique. 
 Factorizing this tensor $\chi$ produces four parameters: one rank-3 core tensor and three groups of matrices. Using an efficient tensor 
 factorization technique pairwise interaction tensor factorization (PITF), we get the following 
-estimation equation for the probability of user $u$ going to location $l$ from location $i$:
+estimation equation for the probability of user $u$ going to location $l$ from location $i$. \cite{Rendle:2010:PIT}
 
 \begin{equation}
 	\hat{x}_{u,i,l} := v_u^{U,L} \cdot v_l^{L,U} + v_l^{L,I} \cdot v_i^{I,L} + v_u^{U,I} \cdot v_i^{I,U}
 \label{eq:MF}
 \end{equation}
+
+\begin{itemize}
+\item[--] Interaction between the user features $v_u^{U,L}$ and the next location $v_l^{L,U}$.
+\item[--] Interaction between the current location $v_l^{L,I}$ and the next location $v_i^{I,L}$.
+\item[--] Interaction between the user features $v_u^{U,I}$ and the current location $v_i^{I,U}$.
+\end{itemize}
 
 This is the essence of FPMC method. To achieve the recommendation goal $\hat{x}_{u,i,l}$, we 
 construct a tensor containing MCs for users, and then we factorize the tensor into a rank-3 tensor 
@@ -275,7 +284,7 @@ shows the trend that users tend to check in places close to their previous check
 but FPMC does not really make use of this potentially useful trend.
 
 To add the ability to use localized region constraint 
-information into the existing FPMC model, Cheng et al. [2013] 
+information into the existing FPMC model, Cheng et al. \cite{Cheng:2013}
 introduces a model called FPMC-LR which combines FPMC model with localized 
 region (LR) constraints to provide accurate successive POI recommendation in LBSNs. 
 Because FPMC-LR only takes into account nearby candidate locations depending 
@@ -293,7 +302,7 @@ all possible locations for each user, so the tensor looks like:
 	\chi \in [0, 1]^{|U| \times |L| \times |L|}
 \label{eq:summation}
 \end{equation}
-On the other hand, FPMC-LR only considers neighborhood locations of the previous check-in location $i$. 
+Unlike FPMC, FPMC-LR only considers neighborhood locations of the previous check-in location $i$. 
 The tensor transition in FPMC-LR looks like:
 \begin{equation}
 	\chi \in [0, 1]^{|U| \times |L| \times |N_d(L)|}
@@ -301,15 +310,32 @@ The tensor transition in FPMC-LR looks like:
 \end{equation}
 The set of neighborhood locations \begin{math}N_d(L)\end{math} is calculated by Haversine formula, 
 which is used to find the shortest distance between two points on the surface of a sphere. 
-In this case, we assume the earth is roughly a sphere. By applying the same tensor factorizing technique to 
+In this case, we assume the earth is roughly a sphere. By applying the same tensor factorizing technique PITF to 
 our tensor $\chi \in [0, 1]^{|U| \times |L| \times |N_d(L)|}$, we get the target probability $x_{u,i,l}$.
+
+\begin{figure*}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.96\textwidth]{LA_ex.png}
+  \caption{Location prediction of LA}
+  \label{fig:ex_LA}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.96\textwidth]{NYC_ex.png}
+  \caption{Location prediction of NYC}
+  \label{fig:ex_NYC}
+\end{subfigure}
+\caption{Comparison of location prediction}
+\label{fig:ex}
+\end{figure*}
 
 \subsection{TAD-FPMC}
 \label{sec:typeChangesSpecialChars}
 
 FPMC-LR is a very successful model for POI recommendation in terms of performance and efficiency 
-as we will discuss in later section; it incorporates sequential data with personalization and locality consideration. 
-However, there is a still room for improvement. Li et al. [2017] points out that FPMC-LR approach simply captures 
+as we will discuss in section \ref{sec:experiments}; it incorporates sequential data with personalization and locality consideration. 
+However, there is a still room for improvement. Li et al. \cite{Li:2017} points out that FPMC-LR approach simply captures 
 the consecutive ordering relations in lieu of considering complex user behavior over time. Take college students, 
 for example. Students have morning classes, afternoon classes, or both in one day. When they have morning classes, 
 some of them have breakfast at a brunch cafe after class. When they have afternoon classes, some of them go 
@@ -317,33 +343,72 @@ for a drink at a bar after class. Simply combining them as one sequential patter
 for a drink at a bar after 8:00AM class). In other words, just recognizing sequential data is not 
 enough for capturing the differences in regular periodic pattern.
 
-To make the system consider users' time-varying behavioral trends, Li et al. [2017] suggests time-aware FPMC (TA-FPMC) 
-model, which is an improvement over FPMC-LR model. In section 2-1, Rendle et al. [2010] uses third order tensor to 
-construct a personalized Markov chain. TA-FPMC takes a similar approach. Instead of a third order tensor of 
-user-location-location, it forms a fourth order tensor by adding a time factor. Now, the transition tensor looks like: 
+To make the system aware of users' time-varying behavioral trends, Li et al. \cite{Li:2017} suggests time-aware FPMC (TA-FPMC) 
+model, which is an improvement over FPMC-LR model. Both FPMC and FPMC-LR use a third order tensor to 
+construct a personalized Markov chain. TA-FPMC takes a similar approach but one step forward. Instead of a third order tensor of 
+user-location-location, it forms a fourth order tensor user-time-location-location by adding a time factor. Our transition tensor looks like: 
 \begin{equation}
 	\chi \in [0, 1]^{|U| \times |T| \times |L| \times |L|}
 \label{eq:TA-FPMC_tensor}
 \end{equation}
+
+Using the tensor factorization technique PITF that we used earlier for FPMC and FPMC-LR, we get 
+one rank-3 core tensor and six groups of matrices.
+
+\begin{itemize}
+\item[--] Matrix for interaction between user and time period.
+\item[--] Matrix for interaction between user and current location.
+\item[--] Matrix for interaction between user and next location.
+\item[--] Matrix for interaction between time period and current location.
+\item[--] Matrix for interaction between time period and next location.
+\item[--] Matrix for interaction between current location and next location.
+\end{itemize}
+
+By adding up the corresponding entries in interaction matrices, we get our target value $x_{u,t,i,l}$
+\begin{equation}
+\begin{split}
+\hat{x}_{u,t,i,l} := v_u^{U,T} \cdot v_t^{T,U} + v_u^{U,I} \cdot v_i^{I,U} + v_u^{U,L} \cdot v_l^{L,U}  \\
+	                        + v_t^{T,I} \cdot v_i^{I,T} + v_t^{T,L} \cdot v_l^{L,T} + v_i^{I,L} \cdot v_l^{L,I}
+\end{split}
+\label{eq:TAD-FPMC}
+\end{equation}
+
 There is another statistical characteristic of LBSN data that has not got much attention, the time gap between 
 two successive check-ins. The LBSN data shows that many of two successive check-ins span a large time gap 
 like a year. Base on the assumption that these successive check-ins with large time gaps do not tell much, 
-Li et al. [2017] introduces another factor $D(\Delta t)$ to take into account the time-decaying effect. 
-The final model with all the considerations is called TAD-FPMC.
+Li et al. \cite{Li:2017} introduces another factor $D(\Delta t)$ to take into account the time-decaying effect. 
+The final model with all the considerations is called TAD-FPMC. There are a few variations of TAD-FPMC that 
+are highly optimized for certain data, but we focus on the most basic model of TAD-FPMC for simplicity. 
+For more information about the variations of TAD-FPMC, refer to ~\cite{Li:2017}.
 
 \section{Experiments}
 \label{sec:experiments}
 In the experiments, we will address the following questions: 1) How do different POI recommendation 
 models perform in real LBSN data? 2) Why are distance constraint and temporal information particularly important 
-factors in POI recommendation?
+factors in the POI recommendation?
 
 \subsection{Datasets}
 \label{sec:datasets}
 The evaluation used data collected from Foursquare, a LBSN that provides POI recommendations based on 
 each user's preference. The data includes users' check-in data of New York City and Los Angeles from Jan. 
-2010 to June 2011. Li et al. [2017] divided available locations in the data into 249 categories. 
-The summary of the statistics is elaborated in Table 1. In Table 1, \emph{tip} means comments or reviews on a 
-certain location written by other users.
+2010 to June 2011. Li et al. \cite{Li:2017} divided available locations in the data into 249 categories. 
+The summary of the statistics is elaborated in Table \ref{tab:stat}. \cite{Li:2017}
+
+\begin{table}[ht]
+\centering
+\caption{The Statistics of Data}
+\bigskip
+\label{tab:stat}
+\begin{tabular}{|c|c|c|c|}
+        \hline
+        City & User & Location & Category \\
+        \hline
+        New York & 2,581 & 206,416 & 249 \\
+        \hline
+       Los Angeles & 1,604 & 215,614 & 249 \\
+        \hline
+\end{tabular}
+\end{table}
 
 \subsection{Evaluation Metric}
 \label{metic}
@@ -356,26 +421,21 @@ is in the top-N list. The evaluation metric is defined as:
 \label{eq:P@N}
 \end{equation}
 
-
 \subsection{Comparison}
 \label{comparison}
-Figure * shows the performance comparison among different models of POI recommendation. 
+Figure \ref{fig:ex} shows the performance comparison among different models of POI recommendation. 
 The x-axis represents the N value which is the number of recommended locations, and the y-axis 
-is the precision of the recommendation P@N. In both LA and NYC data, there is a huge gap 
+is the precision of the recommendation $P@N$. In both LA and NYC data, there is a huge gap 
 between generic models (MF and FPMC) and POI specific models (FPMC-LR and TAD-FPMC). 
 This verifies the importance of distance constraint and temporal information in POI recommendations. 
-Also, TAD-FPMC slightly outperforms FPMC-LR in both datasets. If we utilize additional enhancements 
-for TAD-FPMC, the performance improves significantly as we can see in Table .
+Also, TAD-FPMC slightly outperforms FPMC-LR in both datasets. Even though we have not discussed in 
+this paper, variations of TAD-FPMC shows much better performance and efficiency among any other method. 
+The experiments were run on a machine with a Core i7-6700K 4.0GHz 8HT and memory size of 32GB. \cite{Li:2017} 
 
-The experiments were run on a machine with a Core i7-6700K 4.0GHz 8HT and memory size of 32GB. 
-In terms of the efficiency, TAD-FPMC is shown to be the most efficient model with the running time of 
-3 hours compared to FPMC and FPMC-LR with 35 hours. The reduced dimensionality from the number of 
-locations to the number dimensionality improves the efficiency significantly.
+\section{Conclusion}
+\label{sec:conclusion}
 
-\section{Conclusions}
-\label{sec:conclusions}
-
-In this paper, we have considered the task of point-of-interest (POI) recommendation in LBSNs 
+In this paper, we have considered the point-of-interest (POI) recommendation in LBSNs 
 and introduced different approaches for accurate predictions. Factorized personalized Markov 
 chain (FPMC) model is an elegant method combining advantages of Markov chains and matrix factorization,
 but it was not designed to incorporate distinct characteristics of LBSN data. FPMC-LR is an enhancement 
@@ -389,22 +449,8 @@ Additionally, TAD-FPMC produces better predictions than any other methods includ
 \section*{Acknowledgments}
 \label{sec:acknowledgments}
 
-This section is optional; it is a location for you
-to acknowledge grants, funding, editing assistance and
-what have you.
-
-You want to use the \texttt{\textbackslash section*} version of the \texttt{section}
-command, as an acknowledgments section typically does \emph{not} get
-a number.
-
-It is common (but by no means necessary) for students to thank
-their advisor, and possibly other faculty, friends, and family who provided
-useful feedback on the paper as it was being written.
-
-In the present case, for example, the
-authors would like to thank Gerald Murray of ACM for
-his help in codifying this \textit{Author's Guide}
-and the \textbf{.cls} and \textbf{.tex} files that it describes.
+I thank my senior seminar professors, Peter Dolan and Kristin Lamberty, 
+for their helpful advice and comments throughout the research and writing process.
 
 % The following two commands are all you need in the
 % initial runs of your .tex file to
@@ -412,6 +458,7 @@ and the \textbf{.cls} and \textbf{.tex} files that it describes.
 \bibliographystyle{abbrv}
 % sample_paper.bib is the name of the BibTex file containing the
 % bibliography entries. Note that you *don't* include the .bib ending here.
+
 \bibliography{sample_paper}  
 % You must have a proper ".bib" file
 %  and remember to run:
