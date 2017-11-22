@@ -73,7 +73,7 @@ of the users. Users can share videos, pictures, or reviews about these places vi
 feature. Based on the collected user data, LBSNs provide POI recommendations. POI recommendation 
 is very important for LBSNs for two reasons. First, users are more likely to use the platform and check-in places 
 for their own benefit if it gives accurate predictions on places where users visit next time. 
-Second, it allows the advertisers to launch advertisements for target user groups. Therefore, 
+Second, it allows to serve targeted advertisers to specific user groups. Therefore, 
 accurate POI recommendation is crucial for the success of LBSNs. \cite{Cheng:2013}
 
 Even though POI recommendation is a type of recommendation system, it has distinct characteristics 
@@ -109,7 +109,7 @@ NYC from a LBSN (Foursquare) over different hours of a day. The number of check-
 on the time.
 \item[--] People are likely to visit nearby places because of geographical limitation. Not many people are willing 
 to fly to Japan from the US just for a nice sushi restaurant.
-\item[--] The transition between POI is strongly affected by the user's own preference. Li et al. \cite{Li:2017} refers to this as a long-term individual preference. For instance, some people go to the gym after work, but some people go home right away after work. 
+\item[--] The transition between POIs is strongly affected by the user's own preference. Li et al. \cite{Li:2017} refers to this as a long-term individual preference. For instance, some people go to the gym after work, but some people go home right away after work. 
 \item[--] A user's next location is highly related to the user's current location. We would call this the sequential feature of POI recommendations. 
 \end{itemize}
 
@@ -120,13 +120,14 @@ The ideas behind MF and MC will be explored in more detail in section \ref{sec:b
 Because of the known drawbacks of each model, Rendle et al. \cite{Rendle:2010:FPM} proposes factorizing personalized 
 Markov chains (FPMC), which is the combination of MC and MF techniques. FPMC is a robust system, 
 but it is a generic model and not designed for POI recommendations. To capture the locality feature of 
-POI recommendations, Cheng et al. \cite{Cheng:2013} suggests FPMC-LR method where LR stands for localized regions. 
+POI recommendations, Cheng et al. \cite{Cheng:2013} extends FPMC to include localized region (LR) information.  
+This extension is abbreviated as FPMC-LR. 
 And, Li et al. \cite{Li:2017} proposes time-aware FPMC with time decaying consideration called TAD-FPMC.
 
-In section 2, we are going to cover general and mathematical backgrounds in recommendation systems 
-to understand the proposed models. Then in section 3, we will explore the proposed approaches in detail. 
-In section 4, we will compare the accuracy of different recommendation techniques: FPMC, FPMC-LR, and TAD-FPMC. 
-And finally, we will conclude the paper in section 5.
+In section \ref{sec:backgrounds}, we are going to cover mathematical backgrounds in recommendation systems 
+to understand the proposed models. Then in section \ref{sec:fpmc}, we will explore the proposed approaches in detail. 
+In section \ref{sec:experiments}, we will compare the accuracy of different recommendation techniques: FPMC, FPMC-LR, and TAD-FPMC. 
+Finally, we summarize our findings in section \ref{sec:conclusion}.
 
 
 
@@ -138,13 +139,14 @@ And finally, we will conclude the paper in section 5.
 including movie, item, and POI recommendations. An MC is defined on a set of states; each state can be either a value
 or a set of values. In the context of LBSN, each state represents a place where users can visit.
 Now, we can define an MC as a collection of transitional probabilities among different states.
-In other words, it is a map of transitions from one state to another state. 
+In other words, it is a map of transitions from one state to another state where transitions are labeled with their probability.  
+It's worth pointing out that the sum of all transitions leading out of a state must sum to 1.
 
 Figure \ref{fig:MarkovChain} shows a simple Markov chain 
-model with two possible states: house (H) and school (S). The labels on the arrows represent 
+model with two possible states: home (H) and school (S). The labels on the arrows represent 
 the probability of the transition to the indicated direction. When the current state of the 
 user is H, the probability of the user going to S (going to school) is 70\% and the probability of the 
-user going to H (staying in the house) is 30\%. The diagram of states and transitions can also be 
+user going to H (staying at home) is 30\%. The diagram of states and transitions can also be 
 represented as a transition probability matrix, which allows for mathematical analysis. One important 
 characteristic of the Markov chain is that predictions of future transitions are solely based on the present 
 system. Therefore, the previous iterations and future iterations are completely independent. 
@@ -152,43 +154,46 @@ Just like the simple example above, we can easily imagine that Markov chains are
 POI recommendation but with tens of thousands of places instead of two places. In practice, MC based 
 approaches use one general transition matrix over all users. 
 
-\textbf{Matrix factorizaion.} In Linear Algebra, matrix factorization (MF) is a technique to 
+\textbf{Matrix factorization.} In Linear Algebra, matrix factorization (MF) is a technique to 
 factor a matrix as a product of multiple matrices. When used in POI recommendation systems, 
-the original matrix has two dimensions: locations and users. Each entry represents the rating of 
-the place from the user. As you can see in Figure \ref{fig:MF}, the matrix
-has many 0 entries which are the places users have never visited, so no rating exist. 
-Our goal is filling those empty entries by calculating predicted ratings. This is where MF becomes
-relevant. Using the MF technique, the location-user matrix can be represented as a product of two matrices: 
-a location matrix and a user matrix. As in Figure \ref{fig:MF}, both location matrix $L$ and user matrix $U$ share 
-a latent factor space of dimensionality $f$. Each entry in $f$ is a feature that we can measure.
-For instance, the above matrices has two features: shopping? and food?. Once we find the two 
-factors of A, we can make an estimation of unknown ratings. Let $q_l \in \mathbb{R}^f$ be a vector associated with location $l$, and 
-$p_u \in \mathbb{R}^f$ be a vector associated with user $u$. The elements of $q_l$ show how related location $l$ is to its factors, 
-and the elements of $p_u$ show how interested user $u$ is in the factors. If $r_{u,l}$ is the rating of location $l$ 
+the original matrix has two dimensions: locations and users. Consider each row as representing a user and each column 
+as representing a location. Each entry in the matrix occurs at a distinct row and column; this entry represents a user's rating 
+for that particular location. As you can see in figure \ref{fig:MF}, the final matrix in the figure
+has many 0 entries which are the places users have never visited or not rated, so no rating exist. 
+
+Our goal is filling the empty entries by calculating predicted ratings. This is where MF becomes
+relevant. Using the MF technique (see \cite{Koren:2009} for more details), the location-user matrix can be represented as a product of two matrices: 
+a location matrix $L$ and a user matrix $U$. Ratings matrix $R$ from figure \ref{fig:MF} is the product of $L$ and $U$:  $R = L U$. 
+You might notice that $L$ and $U$ do not have the same dimensionality as $R$. For matrix multiplication to be defined, the number of columns in $L$ and the number of rows in $U$ must match.  
+We call this number $f$; it represents the features. In the example, I have chosen  \emph{shopping?} and  \emph{food?} for simplicity, 
+but in general the algorithm that does the estimating is given a value for how many features to include and there is not always such a clear-cut way of explaining their meaning. In the diagram, the given number of features is 2. Once we find the two 
+factors of $R$, we can make an estimation of unknown ratings. Let $q_l$ be the row associated with location $l$, and 
+$p_u \in \mathbb{R}^f$ be the column associated with user $u$. The elements of $q_l$ show how related location $l$ is to its features, 
+and the elements of $p_u$ show how interested user $u$ is in the features. If $r_{u,l}$ is the rating of location $l$ 
 from user $u$, we can find the estimate rating via multiplying corresponding entries. ~\cite{Koren:2009}
 \begin{equation}
-	r_{u,l}= q_l^T p_u
+	r_{u,l}= q_l p_u
 \label{eq:MF}
 \end{equation}
 
 The following are some clarifications on the estimation process:
 \begin{itemize}
-\item[--] The location-user matrix has many missing entries. Thus, the matrix factors ($U$ and $L$ from figure \ref{fig:MF}) are 
+\item[--] The location-user matrix has many missing entries. Thus, the matrix factors ($L$ and $U$ from figure \ref{fig:MF}) are 
 estimates whose product produces a matrix similar to the original matrix.
 \item[--] The size of $f$ matters with respect to efficiency and accuracy. If $f$ is too small, we do not 
-incorporate enough features for a precise recommendation. If $f$ is too large, it takes a very long time 
+incorporate enough features for precise predictions. If $f$ is too large, it takes a very long time 
 to compute the predictions. Hence, the number of features $f$ should be chosen carefully depending on 
 the given circumstances.
 \end{itemize}
 
-\textbf{Tensor.} A tensor is essentially a quantity which can be represented by a magnitude, a direction, and 
-a dimension. Remember a vector is a quantity of a magnitude and a direction, and a scalar 
-is a quantity of a magnitude. In fact, a vector is a tensor of rank 1 and a scalar is a tensor 
+\textbf{Tensor.} From our point of view, a tensor is a multidimensional array  in programming languages.  
+The rank of the tensor is then the number of components needed to specify an entry in the array. 
+In fact, a vector is a tensor of rank 1 and a scalar is a tensor 
 of rank 0. Simply put, a rank 2 tensor can be represented as a matrix, and higher rank tensors 
 are thought of as a multi-dimensional version of a matrix. For instance, we can stack matrices on 
-the top of one another to represent a 3 rank cube-shaped tensor. From the perspective of Computer Science, tensors can be 
-thought of as multi-dimensional arrays in programming languages.
-Just like matrices, tensors can also be factorized. This is a key idea of many POI recommendation approaches 
+the top of one another to represent a 3 rank cube-shaped tensor.
+Just like matrices can be factorized, tensors can also be factorized. 
+This is a key idea of many POI recommendation approaches 
 that we will discuss more in the next section.
 
 \begin{figure*}
