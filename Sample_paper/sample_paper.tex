@@ -387,16 +387,16 @@ For more information about the variations of TAD-FPMC, refer to ~\cite{Li:2017}.
 
 \section{Experiments}
 \label{sec:experiments}
-In the experiments, we will address the following questions: 1) How do different POI recommendation 
+In this section, we will address the following questions: 1) How do different POI recommendation 
 models perform in real LBSN data? 2) Why are distance constraint and temporal information particularly important 
 factors in the POI recommendation?
 
 \subsection{Datasets}
 \label{sec:datasets}
 The evaluation used data collected from Foursquare, a LBSN that provides POI recommendations based on 
-each user's preference. The data includes users' check-in data of New York City and Los Angeles from Jan. 
+each user's preference. The data includes users' check-in data for New York City and Los Angeles from Jan. 
 2010 to June 2011. Li et al. \cite{Li:2017} divided available locations in the data into 249 categories. 
-The summary of the statistics is elaborated in Table \ref{tab:stat}. \cite{Li:2017}
+The statistics of data is summarized in table \ref{tab:stat}. \cite{Li:2017}
 
 \begin{table}[ht]
 \centering
@@ -416,24 +416,26 @@ The summary of the statistics is elaborated in Table \ref{tab:stat}. \cite{Li:20
 
 \subsection{Evaluation Metric}
 \label{metic}
-The main task for models is providing a list of top-N locations (the list contains N locations 
-ordered from the highest probability of user visit to the lowest). The recommendation is considered 
-correct if the user indeed visited a location in the top-N list or the category of the user visit location 
-is in the top-N list. The evaluation metric is defined as:
+The main task for the algorithms is providing a list of the top-N recommended locations
+ordered from the highest probability of user visit to the lowest. Evaluation metrics take advantage of historic data.  
+A location recommendation is considered correct if the user had visited that place in the past. 
+The evaluation metric $P@N$ (Precision) is defined as:
 \begin{equation}
 	P@N = \frac{\textrm{the counts of correct predictions}} {\textrm{the total number of recommendation rounds}}
 \label{eq:P@N}
 \end{equation}
+The number of recommendation rounds is a constant representing the number of times a top-N list was 
+generated and checked if correct.
 
 \subsection{Comparison}
 \label{comparison}
-Figure \ref{fig:ex} shows the performance comparison among different models of POI recommendation. 
-The x-axis represents the N value which is the number of recommended locations, and the y-axis 
+Figure \ref{fig:ex} shows the performance comparison among different algorithms of POI recommendation. 
+The x-axis represents the number of recommended locations, N, and the y-axis 
 is the precision of the recommendation $P@N$. In both LA and NYC data, there is a huge gap 
 between generic models (MF and FPMC) and POI specific models (FPMC-LR and TAD-FPMC). 
 This verifies the importance of distance constraint and temporal information in POI recommendations. 
-Also, TAD-FPMC slightly outperforms FPMC-LR in both datasets. Even though we have not discussed in 
-this paper, variations of TAD-FPMC shows much better performance and efficiency among any other method. 
+Also, TAD-FPMC slightly outperforms FPMC-LR in both datasets. More sophisticated variations of TAD-FPMC outperform 
+all the models examined in this paper. The curious reader is referred to \cite{Li:2017}.
 The experiments were run on a machine with a Core i7-6700K 4.0GHz 8HT and memory size of 32GB. \cite{Li:2017} 
 
 \section{Conclusion}
@@ -445,7 +447,7 @@ chain (FPMC) model is an elegant method combining advantages of Markov chains an
 but it was not designed to incorporate distinct characteristics of LBSN data. FPMC-LR is an enhancement 
 of FPMC by only considering nearby locations when calculating POI predictions. TAD-FPMC is a novel 
 POI recommendation system approach that captures complex user behavior over time in addition to inheriting strengths 
-of FPMC and FPMC-LR models. From experimental results conducted on Foursquare data, we conclude 
+of FPMC and FPMC-LR models. From experimental results conducted on Foursquare data for LA and NYC, we conclude 
 POI recommendation specific approaches (FPMC-LR, TAD-FPMC) far outperform generic recommendation models such as FPMC.
 Additionally, TAD-FPMC produces better predictions than any other methods including FPMC-LR.
 
