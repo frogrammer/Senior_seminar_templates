@@ -150,9 +150,23 @@ user going to H (staying at home) is 30\%. The diagram of states and transitions
 represented as a transition probability matrix, which allows for mathematical analysis. One important 
 characteristic of the Markov chain is that predictions of future transitions are solely based on the present 
 system. Therefore, the previous iterations and future iterations are completely independent. 
-Just like the simple example above, we can easily imagine that Markov chains are directly applied to 
-POI recommendation but with tens of thousands of places instead of two places. In practice, MC based 
-approaches use one general transition matrix over all users. 
+
+When used in location predictions, we often want each transition to occur every certain time span.
+This will simplify calculations by allowing us to divide a day into evenly broken hours. The issue is each state is now 
+a set of locations instead of a location because a user can visit multiple places within a couple hours. 
+To resolve this issue, let us define Markov chains for sets. The states are sets of locations and transitions are 
+between those sets. Unlike traditional MCs, the state space is $2^{|I|}$ when 
+$I$ is the set of all different locations. Figure * shows an MC for sets. There are three different states or sets:
+${home, school}$, ${home, cafe}$, and ${school}$. Also, there are two transitions from the first state to the second 
+state, and from the second state to the third state. We can encode this MC into a transition matrix as in 
+figure *+1. The right most column named \# represents how many transitions come from the location in the row.
+To calculate the probability, we divide the number of transitions from a location to a location by the right most 
+column's value. For instance, two transitions start from home and one transition goes to school from home in
+the example. Thus, the probability of transitioning from home to school is $1/2$. 
+
+As illustrated in the examples above, we can imagine Markov chains are directly applied to 
+POI recommendations but with tens of thousands of places instead of a couple places. Note, in practice, MC based 
+approaches use one general transition matrix over all users.
 
 \textbf{Matrix factorization.} In Linear Algebra, matrix factorization (MF) is a technique to 
 factor a matrix as a product of multiple matrices. When used in POI recommendation systems, 
