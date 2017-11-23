@@ -72,8 +72,8 @@ places like a restaurant or cinema; we call these checked-in places the points o
 of the users. Users can share videos, pictures, or reviews about these places via this ``check-in" 
 feature. Based on the collected user data, LBSNs provide POI recommendations. POI recommendation 
 is very important for LBSNs for two reasons. First, users are more likely to use the platform and check-in places 
-for their own benefit if it gives accurate predictions on places where users visit next time. 
-Second, it allows to serve targeted advertisers to specific user groups. Therefore, 
+for their own benefit if the quality of recommendation is precise. 
+Second, it allows targeted advertisers to serve specific user groups. Therefore, 
 accurate POI recommendation is crucial for the success of LBSNs. \cite{Cheng:2013}
 
 Even though POI recommendation is a type of recommendation system, it has distinct characteristics 
@@ -90,22 +90,26 @@ meaningful differences between conventional recommendations and POI recommendati
 \end{figure}
 
 \begin{figure*}
-\centering
-\psfig{file=MF.png,width=6in}
-\caption{Matrix factorization of location-user matrix}
-\label{fig:MF}
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.75\textwidth]{MCforSets.png}
+  \caption{Transition diagram of a Markov chain for sets}
+  \label{fig:MCSets}
+\end{subfigure}%
+\begin{subfigure}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.75\textwidth]{MCforSetsM.png}
+  \caption{Transition matrix for (a)}
+  \label{fig:MCSetsM}
+\end{subfigure}
+\caption{Markov chains for sets}
+\label{fig:ex}
 \end{figure*}
 
-\begin{figure}
-\centering
-\psfig{file=MarkovChain.pdf,width=3in}
-\caption{Markov chain with two states H (house) and S (school)}
-\label{fig:MarkovChain}
-\end{figure}
 
 \begin{itemize}
 \item[--] The types of checked-in place are highly related to the time period. Figure \ref{fig:NYC_checkIn} shows check-in data in 
-NYC from a LBSN (Foursquare) over different hours of a day. The number of check-ins clearly varies depending 
+NYC from an LBSN (Foursquare) over different hours of a day. The number of check-ins clearly varies depending 
 on the time.
 \item[--] People are likely to visit nearby places because of geographical limitation. Not many people are willing 
 to fly to Japan from the US just for a nice sushi restaurant.
@@ -113,12 +117,17 @@ to fly to Japan from the US just for a nice sushi restaurant.
 \item[--] A user's next location is highly related to the user's current location. We would call this the sequential feature of POI recommendations. 
 \end{itemize}
 
-
+\begin{figure*}
+\centering
+\psfig{file=MF.png,width=6in}
+\caption{Matrix factorization of location-user matrix}
+\label{fig:MF}
+\end{figure*}
 
 Traditionally, matrix factorization (MF) or Markov chain (MC) have been popular techniques for producing recommendations.
 The ideas behind MF and MC will be explored in more detail in section \ref{sec:backgrounds}. 
 Because of the known drawbacks of each model, Rendle et al. \cite{Rendle:2010:FPM} proposes factorizing personalized 
-Markov chains (FPMC), which is the combination of MC and MF techniques. FPMC is a robust system, 
+Markov chains (FPMC), which is a combination of MC and MF techniques. FPMC is a robust system, 
 but it is a generic model and not designed for POI recommendations. To capture the locality feature of 
 POI recommendations, Cheng et al. \cite{Cheng:2013} extends FPMC to include localized region (LR) information.  
 This extension is abbreviated as FPMC-LR. 
@@ -140,27 +149,20 @@ including movie, item, and POI recommendations. An MC is defined on a set of sta
 or a set of values. In the context of LBSN, each state represents a place where users can visit.
 Now, we can define an MC as a collection of transitional probabilities among different states.
 In other words, it is a map of transitions from one state to another state where transitions are labeled with their probability.  
-It's worth pointing out that the sum of all transitions leading out of a state must sum to 1.
-
-Figure \ref{fig:MarkovChain} shows a simple Markov chain 
-model with two possible states: home (H) and school (S). The labels on the arrows represent 
-the probability of the transition to the indicated direction. When the current state of the 
-user is H, the probability of the user going to S (going to school) is 70\% and the probability of the 
-user going to H (staying at home) is 30\%. The diagram of states and transitions can also be 
-represented as a transition probability matrix, which allows for mathematical analysis. One important 
+It is worth pointing out that the sum of all transitions leading out of a state must sum to 1. Another important 
 characteristic of the Markov chain is that predictions of future transitions are solely based on the present 
 system. Therefore, the previous iterations and future iterations are completely independent. 
 
-When used in location predictions, we often want each transition to occur every certain time span.
-This will simplify calculations by allowing us to divide a day into evenly broken hours. The issue is each state is now 
-a set of locations instead of a location because a user can visit multiple places within a couple hours. 
-To resolve this issue, let us define Markov chains for sets. The states are sets of locations and transitions are 
-between those sets. Unlike traditional MCs, the state space is $2^{|I|}$ when 
-$I$ is the set of all different locations. Figure * shows an MC for sets. There are three different states or sets:
-${home, school}$, ${home, cafe}$, and ${school}$. Also, there are two transitions from the first state to the second 
+When used in location predictions, we often want each state to capture all locations visited over a specific interval of time 
+and for our transitions to occur at fixed intervals. This will simplify calculations by allowing us to divide a day into evenly broken hours. 
+By expanding our set of states to be all possible subsets of the set of all locations, we accomplish this goal. 
+This new expansion is called Markov chains for sets. Unlike traditional MCs, the state space is $2^{|L|}$ when 
+$L$ is the set of all different locations. Figure \ref{fig:MCSets} shows an MC for sets. There are three different states or sets:
+$\{home, school\}$, $\{home, cafe\}$, and $\{school\}$. Also, there are two transitions: from the first state to the second 
 state, and from the second state to the third state. We can encode this MC into a transition matrix as in 
-figure *+1. The right most column named \# represents how many transitions come from the location in the row.
-To calculate the probability, we divide the number of transitions from a location to a location by the right most 
+figure \ref{fig:MCSetsM}. Let us call the location associated with a row \emph{start-location} and the location associated with a column \emph{end-location}. 
+The right most column named \# represents the total number of \emph{start-location} appeared in transitions.
+To calculate the probability, we divide the number of transitions from a \emph{start-location} to a \emph{end-location} by the \# 
 column's value. For instance, two transitions start from home and one transition goes to school from home in
 the example. Thus, the probability of transitioning from home to school is $1/2$. 
 
@@ -200,11 +202,11 @@ to compute the predictions. Hence, the number of features $f$ should be chosen c
 the given circumstances.
 \end{itemize}
 
-\textbf{Tensor.} From our point of view, a tensor is a multidimensional array  in programming languages.  
+\textbf{Tensor.} From our point of view, a tensor is a multidimensional array in any programming language.
 The rank of the tensor is then the number of components needed to specify an entry in the array. 
-In fact, a vector is a tensor of rank 1 and a scalar is a tensor 
-of rank 0. Simply put, a rank 2 tensor can be represented as a matrix, and higher rank tensors 
-are thought of as a multi-dimensional version of a matrix. For instance, we can stack matrices on 
+A vector is a tensor of rank 1 and a scalar is a tensor 
+of rank 0. A rank 2 tensor can be represented as a matrix, and higher rank tensors 
+are thought of as a multidimensional version of a matrix. For instance, we can stack matrices on 
 the top of one another to represent a 3 rank cube-shaped tensor.
 Just like matrices can be factorized, tensors can also be factorized. 
 This is a key idea of many POI recommendation approaches 
@@ -450,7 +452,7 @@ between generic models (MF and FPMC) and POI specific models (FPMC-LR and TAD-FP
 This verifies the importance of distance constraint and temporal information in POI recommendations. 
 Also, TAD-FPMC slightly outperforms FPMC-LR in both datasets. More sophisticated variations of TAD-FPMC outperform 
 all the models examined in this paper. The curious reader is referred to \cite{Li:2017}.
-The experiments were run on a machine with a Core i7-6700K 4.0GHz 8HT and memory size of 32GB. \cite{Li:2017} 
+The experiments were run on a quad-core machine with a Core i7-6700K 4.0GHz 8HT and memory size of 32GB. \cite{Li:2017} 
 
 \section{Conclusion}
 \label{sec:conclusion}
