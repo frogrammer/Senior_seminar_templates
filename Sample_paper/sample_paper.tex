@@ -178,7 +178,7 @@ for that particular location. As you can see in figure \ref{fig:MF}, the final m
 has many 0 entries which are the places users have never visited or not rated, so no rating exist. 
 
 Our goal is filling the empty entries by calculating predicted ratings. This is where MF becomes
-relevant. Using the MF technique (see \cite{Koren:2009} for more details), the location-user matrix can be represented as a product of two matrices: 
+relevant. By factorizing the location-user matrix, it can be represented as a product of two matrices: 
 a location matrix $L$ and a user matrix $U$. Ratings matrix $R$ from figure \ref{fig:MF} is the product of $L$ and $U$:  $R = L U$. 
 You might notice that $L$ and $U$ do not have the same dimensionality as $R$. For matrix multiplication to be defined, the number of columns in $L$ and the number of rows in $U$ must match.  
 We call this number $f$; it represents the features. In the example, I have chosen  \emph{shopping?} and  \emph{food?} for simplicity, 
@@ -196,11 +196,18 @@ The following are some clarifications on the estimation process:
 \begin{itemize}
 \item[--] The location-user matrix has many missing entries. Thus, the matrix factors ($L$ and $U$ from figure \ref{fig:MF}) are 
 estimates whose product produces a matrix similar to the original matrix.
-\item[--] The size of $f$ matters with respect to efficiency and accuracy. If $f$ is too small, we do not 
-incorporate enough features for precise predictions. If $f$ is too large, it takes a very long time 
-to compute the predictions. Hence, the number of features $f$ should be chosen carefully depending on 
-the given circumstances.
+\item[--] The size of $f$ matters with respect to accuracy. If $f$ is too small, we do not 
+incorporate enough features for precise predictions. Koren et al. \cite{Koren:2009} verified 
+increasing the size of $f$ results in more precise predictions.
 \end{itemize}
+
+That was a brief summary of single value decomposition (SVD) model. SVD is often at risk of overfitting,
+which essentially means that there are unnecessary features incorporated in the model.  
+Rendle et al. \cite{Rendle:2010:FPM} introduces a method named Bayesian personalized ranking (BPR) 
+solving the problem of overfitting. The main difference between SVD and BPR is in representing the 
+observed data, the $R$ matrix. Given the $R$ matrix, BPR creates a matrix of item pairs for each user. 
+Each entry in the matrix represents preference of an item in comparison to another, so they can be either 
+positive or negative. See \cite{Rendle:2009:BBP} for more details of BPR.
 
 \textbf{Tensor.} From our point of view, a tensor is a multidimensional array in any programming language.
 The rank of the tensor is then the number of components needed to specify an entry in the array. 
@@ -239,7 +246,7 @@ enhancements specializing in LSBN specific data properties.
 
 Before we dive into the details of the algorithms, let us introduce the notation used in this paper. 
 Let $U$ be a set of users and $L$ be a set of locations. For each user $u \in U$, 
-we know their check-in history set \begin{math}L^t_u\end{math} where $t$ is the timestamp 
+we know their check-in history set \begin{math}L^t_u\end{math} where $t$ is the interval 
 of a user visit. Our goal now is, given the user check-in data 
 \begin{math}L^1_u,...,L^{t-1}_u\end{math}, recommend a next location to 
 a user $u$ at time $t$. This goal is roughly equivalent to finding the probability of $u$ 
@@ -273,19 +280,20 @@ The question mark (?) entries mean we have no data to estimate the probability o
 MC matrices is that they are often very sparse, so they result in poor estimations. We just do not have enough data from
 each user. This is the place where the ideas of MF can be applied. By stacking all transition matrices of users, 
 we can get a transition cube or tensor $\chi$. Now, we can factorize the tensor using a tensor factorization technique. 
-Factorizing this tensor $\chi$ produces four parameters: one rank-3 core tensor and three groups of matrices. Using an efficient tensor 
+Factorizing this tensor $\chi$ produces four parameters: one rank-3 core tensor and three matrices. Using an efficient tensor 
 factorization technique pairwise interaction tensor factorization (PITF), we get the following 
 estimation equation for the probability of user $u$ going to location $l$ from location $i$. \cite{Rendle:2010:PIT}
 
 \begin{equation}
-	\hat{x}_{u,i,l} := v_u^{U,L} \cdot v_l^{L,U} + v_l^{L,I} \cdot v_i^{I,L} + v_u^{U,I} \cdot v_i^{I,U}
-\label{eq:MF}
+	\hat{x}_{u,i,l} := \underbrace{v_u^{U,L} \cdot v_l^{L,U}}_{A} + \underbrace{v_l^{L,I} \cdot v_i^{I,L}}_{B} 
+	+ \underbrace{v_u^{U,I} \cdot v_i^{I,U}}_{C}
+\label{eq:FPMC}
 \end{equation}
 
 \begin{itemize}
-\item[--] Interaction between the user features $v_u^{U,L}$ and the next location $v_l^{L,U}$.
-\item[--] Interaction between the current location $v_l^{L,I}$ and the next location $v_i^{I,L}$.
-\item[--] Interaction between the user features $v_u^{U,I}$ and the current location $v_i^{I,U}$.
+\item[--] A: Interaction between the user features $v_u^{U,L}$ and the next location $v_l^{L,U}$.
+\item[--] B: Interaction between the current location $v_l^{L,I}$ and the next location $v_i^{I,L}$.
+\item[--] C: Interaction between the user features $v_u^{U,I}$ and the current location $v_i^{I,U}$.
 \end{itemize}
 
 This is the essence of the FPMC method. To achieve the recommendation goal $\hat{x}_{u,i,l}$, we 
@@ -373,22 +381,24 @@ user-location-location, it forms a fourth order tensor user-time-location-locati
 \end{equation}
 
 Using the tensor factorization technique PITF that we used earlier for FPMC and FPMC-LR, we get 
-one rank-3 core tensor and six groups of matrices.
+one rank-3 core tensor and six matrices which capture the following interactions similar to equation \ref{eq:FPMC}.
 
 \begin{itemize}
-\item[--] Interaction between the user features $v_u^{U,T}$ and the time period $v_t^{T,U}$.
-\item[--] Interaction between the user features $v_u^{U,I}$ and the current location $v_i^{I,U}$.
-\item[--] Interaction between the user features $v_u^{U,L}$ and the next location $v_l^{L,U}$.
-\item[--] Interaction between the time period $v_t^{T,I}$ and the current location $v_i^{I,T}$.
-\item[--] Interaction between the time period $v_t^{T,L}$ and the next location $v_l^{L,T}$.
-\item[--] Interaction between the current location $v_i^{I,L}$ and the next location $v_l^{L,I}$.
+\item[--] A: Interaction between the user features $v_u^{U,T}$ and the time period $v_t^{T,U}$.
+\item[--] B: Interaction between the user features $v_u^{U,I}$ and the current location $v_i^{I,U}$.
+\item[--] C: Interaction between the user features $v_u^{U,L}$ and the next location $v_l^{L,U}$.
+\item[--] D: Interaction between the time period $v_t^{T,I}$ and the current location $v_i^{I,T}$.
+\item[--] E: Interaction between the time period $v_t^{T,L}$ and the next location $v_l^{L,T}$.
+\item[--] F: Interaction between the current location $v_i^{I,L}$ and the next location $v_l^{L,I}$.
 \end{itemize}
 
 By adding up the corresponding entries in interaction matrices, we get our target value $x_{u,t,i,l}$
 \begin{equation}
 \begin{split}
-\hat{x}_{u,t,i,l} := v_u^{U,T} \cdot v_t^{T,U} + v_u^{U,I} \cdot v_i^{I,U} + v_u^{U,L} \cdot v_l^{L,U}  \\
-	                        + v_t^{T,I} \cdot v_i^{I,T} + v_t^{T,L} \cdot v_l^{L,T} + v_i^{I,L} \cdot v_l^{L,I}
+\hat{x}_{u,t,i,l} := \underbrace{v_u^{U,T} \cdot v_t^{T,U}}_{A} + \underbrace{v_u^{U,I} \cdot v_i^{I,U}}_{B} + 
+								\underbrace{v_u^{U,L} \cdot v_l^{L,U}}_{C}  \\
+	                        + \underbrace{v_t^{T,I} \cdot v_i^{I,T}}_{D} + \underbrace{v_t^{T,L} \cdot v_l^{L,T}}_{E} + 
+	                        \underbrace{v_i^{I,L} \cdot v_l^{L,I}}_{F}
 \end{split}
 \label{eq:TAD-FPMC}
 \end{equation}
@@ -452,7 +462,7 @@ between generic models (MF and FPMC) and POI specific models (FPMC-LR and TAD-FP
 This verifies the importance of distance constraint and temporal information in POI recommendations. 
 Also, TAD-FPMC slightly outperforms FPMC-LR in both datasets. More sophisticated variations of TAD-FPMC outperform 
 all the models examined in this paper. The curious reader is referred to \cite{Li:2017}.
-The experiments were run on a quad-core machine with a Core i7-6700K 4.0GHz 8HT and memory size of 32GB. \cite{Li:2017} 
+The experiments were run on a quad-core machine with a Core i7-6700K 4.0GHz 8 hyper-threading and memory size of 32GB. \cite{Li:2017} 
 
 \section{Conclusion}
 \label{sec:conclusion}
