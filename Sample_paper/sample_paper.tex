@@ -44,7 +44,7 @@ Myeongjae Song\\
 
 \maketitle
 \begin{abstract}
-The precise point-of-interest (POI) recommendation is key to the success of 
+Accurate point-of-interest (POI) recommendations are key to the success of 
 location-based social networks (LBSN) since it will attract more users and advertisers 
 to the platform. To achieve the POI recommendation task, many methods are proposed 
 and used in practice from generic recommendation system methods to POI specific 
@@ -65,14 +65,14 @@ the more accurate the prediction.
 
 Nowadays, location-based social networks (LBSN), such as \emph{Facebook places, Tinder},  and \emph{Yelp}, 
 have been gaining a lot of attention with the widespread use of smartphones embedded with the 
-global positioning system (GPS). Even though LBSN are relatively new compared to 
+global positioning system (GPS). Even though LBSNs are relatively new compared to 
 the traditional social networking services, millions of active users use the platform on a daily basis voluntarily sharing 
 their location information. Many of these LBSNs allow users to ``check-in" to
 places like a restaurant or cinema; we call these checked-in places the points of interest (POI) 
 of the users. Users can share videos, pictures, or reviews about these places via this ``check-in" 
 feature. Based on the collected user data, LBSNs provide POI recommendations. POI recommendation 
 is very important for LBSNs for two reasons. First, users are more likely to use the platform and check-in places 
-for their own benefit if the quality of recommendation is precise. 
+for their own benefit if the quality of recommendation is accurate. 
 Second, it allows targeted advertisers to serve specific user groups. Therefore, 
 accurate POI recommendation is crucial for the success of LBSNs. \cite{Cheng:2013}
 
@@ -109,7 +109,7 @@ meaningful differences between conventional recommendations and POI recommendati
 
 \begin{itemize}
 \item[--] The types of checked-in place are highly related to the time period. Figure \ref{fig:NYC_checkIn} shows check-in data in 
-NYC from an LBSN (Foursquare) over different hours of a day. The number of check-ins clearly varies depending 
+NYC from an LBSN (\emph{Foursquare}) over different hours of a day. The number of check-ins clearly varies depending 
 on the time.
 \item[--] People are likely to visit nearby places because of geographical limitation. Not many people are willing 
 to fly to Japan from the US just for a nice sushi restaurant. \cite{Li:2017}
@@ -124,14 +124,14 @@ to fly to Japan from the US just for a nice sushi restaurant. \cite{Li:2017}
 \label{fig:MF}
 \end{figure*}
 
-Traditionally, matrix factorization (MF) or Markov chain (MC) have been popular techniques for producing recommendations.
+Traditionally, matrix factorization (MF) or Markov chains (MC) have been popular techniques for producing recommendations.
 The ideas behind MF and MC will be explored in more detail in section \ref{sec:backgrounds}. 
-Because of the known drawbacks of each model, Rendle et al. \cite{Rendle:2010:FPM} proposes factorizing personalized 
+Because of the known drawbacks of each model, Rendle et al. \cite{Rendle:2010:FPM} propose factorized personalized 
 Markov chains (FPMC), which is a combination of MC and MF techniques. FPMC is a robust system, 
 but it is a generic model and not designed for POI recommendations. To capture the locality feature of 
-POI recommendations, Cheng et al. \cite{Cheng:2013} extends FPMC to include localized region (LR) information.  
+POI recommendations, Cheng et al. \cite{Cheng:2013} extend FPMC to include localized region (LR) information.  
 This extension is abbreviated as FPMC-LR. 
-And, Li et al. \cite{Li:2017} proposes time-aware FPMC with time decaying consideration called TAD-FPMC.
+And, Li et al. \cite{Li:2017} propose time-aware FPMC with time decaying consideration called TAD-FPMC.
 
 In section \ref{sec:backgrounds}, we are going to cover mathematical backgrounds in recommendation systems 
 to understand the proposed models. Then in section \ref{sec:fpmc}, we will explore the proposed approaches in detail. 
@@ -159,12 +159,16 @@ By expanding our set of states to be all possible subsets of the set of all loca
 This new expansion is called Markov chains for sets. Unlike traditional MCs, the state space is $2^{|L|}$ when 
 $L$ is the set of all different locations. Figure \ref{fig:MCSets} shows an MC for sets. There are three different states or sets:
 $\{home, school\}$, $\{home, cafe\}$, and $\{school\}$. Also, there are two transitions: from the first state to the second 
-state, and from the second state to the third state. We can encode this MC into a transition matrix as in 
-figure \ref{fig:MCSetsM}. Let us call the location associated with a row \emph{start-location} and the location associated with a column \emph{end-location}. 
+state, and from the second state to the third state. 
+In the traditional MC model, the states would be $home, school$, or $cafe$ and the sum of the values in the columns add up to $1$. 
+In the MC for sets paradigm, the transition matrix is calculated per location. 
+The actual transition probabilities between states (sets of locations) can be calculated using the values in this matrix in figure \ref{fig:MCSetsM}, 
+which is also called a transition matrix. Let us call the location associated with a row \emph{start-location} and the location associated with a column \emph{end-location}. 
 The right most column named \# represents the total number of \emph{start-location} appeared in transitions.
 To calculate the probability, we divide the number of transitions from a \emph{start-location} to a \emph{end-location} by the \# 
-column's value. For instance, two transitions start from home and one transition goes to school from home in
-the example. Thus, the probability of transitioning from home to school is $1/2$. 
+column's value. For instance, two transitions start from $home$ and one transition goes to $school$ from $home$ in
+the example. Thus, the entry in the matrix for $home$ to $school$ is $1/2$. 
+This represents the probability that a state containing $home$ will transition to a state containing $school$.
 
 As illustrated in the examples above, we can imagine Markov chains are directly applied to 
 POI recommendations but with tens of thousands of places instead of a couple places. Note, in practice, MC based 
@@ -201,13 +205,12 @@ incorporate enough features for precise predictions. Koren et al. \cite{Koren:20
 increasing the size of $f$ results in more precise predictions.
 \end{itemize}
 
-That was a brief summary of single value decomposition (SVD) model. SVD is often at risk of overfitting,
-which essentially means that there are unnecessary features incorporated in the model.  
-Rendle et al. \cite{Rendle:2010:FPM} introduces a method named Bayesian personalized ranking (BPR) 
-solving the problem of overfitting. The main difference between SVD and BPR is in representing the 
-observed data, the $R$ matrix. Given the $R$ matrix, BPR creates a matrix of item pairs for each user. 
-Each entry in the matrix represents preference of an item in comparison to another, so they can be either 
-positive or negative. See \cite{Rendle:2009:BBP} for more details of BPR.
+For estimating the factors efficiently, Bayesian personalized ranking (BPR) can be used in MF. 
+When representing the observed data $R$, 
+BPR creates a matrix of item pairs for each user. These pairwise relationships built-in BPR allow the system 
+to optimize for the task of ranking different locations. To apply BPR to Markov chains for sets, 
+sequential BPR is used in POI recommendation methods that we will discuss in the following sections.
+For more details of BPR, see \cite{Rendle:2009:BBP}.
 
 \textbf{Tensor.} From our point of view, a tensor is a multidimensional array in any programming language.
 The rank of the tensor is then the number of components needed to specify an entry in the array. 
@@ -307,7 +310,7 @@ factors.
 FPMC successfully constructs a personalized MC model for POI recommendation
 by combining ideas of MF and MC. However, it overlooks another noticeable property 
 of an LBSN dataset, localized region constraint. According to check-in data from 
-Gowalla and Foursquare, more than 75\% of check-ins from Foursquare and 80\% of check-ins 
+\emph{Gowalla} and \emph{Foursquare}, more than 75\% of check-ins from Foursquare and 80\% of check-ins 
 from Gowalla happened within 10 km of the previously checked-in place. \cite{Cheng:2013} The observation on the LBSN data
 shows the trend that users tend to check in places close to their previous check-ins, 
 but FPMC does not really make use of this potentially useful trend.
@@ -341,23 +344,6 @@ The set of neighborhood locations \begin{math}N_d(L)\end{math} is calculated by 
 which is used to find the shortest distance between two points on the surface of a sphere. 
 In this case, we assume the earth is roughly a sphere. By applying the same tensor factorizing technique PITF to 
 our tensor $\chi \in [0, 1]^{|U| \times |L| \times |N_d(L)|}$, we can calculate the target probability $x_{u,i,l}$.
-
-\begin{figure*}
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=0.96\textwidth]{LA_ex.png}
-  \caption{Location prediction of LA}
-  \label{fig:ex_LA}
-\end{subfigure}%
-\begin{subfigure}{.5\textwidth}
-  \centering
-  \includegraphics[width=0.96\textwidth]{NYC_ex.png}
-  \caption{Location prediction of NYC}
-  \label{fig:ex_NYC}
-\end{subfigure}
-\caption{Comparison of location prediction \cite{Li:2017}}
-\label{fig:ex}
-\end{figure*}
 
 \subsection{TAD-FPMC}
 \label{sec:typeChangesSpecialChars}
@@ -411,6 +397,13 @@ The final model with all the considerations is called TAD-FPMC. There are a few 
 are highly optimized for certain data, but we focus on the most basic model of TAD-FPMC for simplicity. 
 For more information about TAD-FPMC, refer to \cite{Li:2017}.
 
+\begin{figure}
+\centering
+\psfig{file=NYC_ex.png,width= 3.5in}
+\caption{Comparison of location prediction in NYC \cite{Li:2017}}
+\label{fig:ex_NYC}
+\end{figure}
+
 \section{Experiments}
 \label{sec:experiments}
 In this section, we will address the following questions: 1) How do different POI recommendation 
@@ -420,7 +413,7 @@ in the POI recommendation?
 \subsection{Datasets}
 \label{sec:datasets}
 The evaluation used data collected from Foursquare, an LBSN that provides POI recommendations. 
-The data includes users' check-in data for New York City and Los Angeles from Jan. 
+The data includes users' check-in data for New York City from Jan. 
 2010 to June 2011. The statistics of data is summarized in table \ref{tab:stat}. \cite{Li:2017}
 
 \begin{table}[ht]
@@ -432,9 +425,7 @@ The data includes users' check-in data for New York City and Los Angeles from Ja
         \hline
         City & User & Location & Category \\
         \hline
-        New York & 2,581 & 206,416 & 249 \\
-        \hline
-       Los Angeles & 1,604 & 215,614 & 249 \\
+        New York City & 2,581 & 206,416 & 249 \\
         \hline
 \end{tabular}
 \end{table}
@@ -454,9 +445,9 @@ generated and checked if correct.
 
 \subsection{Comparison}
 \label{comparison}
-Figure \ref{fig:ex} shows the performance comparison among different algorithms of POI recommendation. 
+Figure \ref{fig:ex_NYC} shows the performance comparison among different algorithms of POI recommendation. 
 The x-axis represents the number of recommended locations, $N$, and the y-axis 
-is the precision of the recommendation $P@N$. In both LA and NYC data, there is a huge gap 
+is the precision of the recommendation $P@N$. In the graph, there is a huge gap 
 between generic models (MF and FPMC) and POI specific models (FPMC-LR and TAD-FPMC). 
 This verifies the importance of distance constraint and temporal information in POI recommendations. 
 Also, TAD-FPMC slightly outperforms FPMC-LR in both datasets. More sophisticated variations of TAD-FPMC outperform 
