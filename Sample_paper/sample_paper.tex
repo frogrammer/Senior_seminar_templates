@@ -155,19 +155,26 @@ system. Therefore, the previous iterations and future iterations are completely 
 
 When used in location predictions, we often want each state to capture all locations visited over a specific interval of time 
 and for our transitions to occur at fixed intervals. This will simplify calculations by allowing us to divide a day into evenly broken hours. 
-By expanding our set of states to be all possible subsets of the set of all locations, we accomplish this goal. 
-This new expansion is called Markov chains for sets. Unlike traditional MCs, the state space is $2^{|L|}$ when 
-$L$ is the set of all different locations. Figure \ref{fig:MCSets} shows an MC for sets. There are three different states or sets:
-$\{home, school\}$, $\{home, cafe\}$, and $\{school\}$. Also, there are two transitions: from the first state to the second 
-state, and from the second state to the third state. 
-In the traditional MC model, the states would be $home, school$, or $cafe$ and the sum of the values in the columns add up to $1$. 
-In the MC for sets paradigm, the transition matrix is calculated per location. 
-The actual transition probabilities between states (sets of locations) can be calculated using the values in this matrix in figure \ref{fig:MCSetsM}, 
-which is also called a transition matrix. Let us call the location associated with a row \emph{start-location} and the location associated with a column \emph{end-location}. 
-The right most column named \# represents the total number of \emph{start-location} appeared in transitions.
-To calculate the probability, we divide the number of transitions from a \emph{start-location} to a \emph{end-location} by the \# 
-column's value. For instance, two transitions start from $home$ and one transition goes to $school$ from $home$ in
-the example. Thus, the entry in the matrix for $home$ to $school$ is $1/2$. 
+By expanding our set of states to be non-empty subsets of the set of locations, $L$,  we accomplish this
+goal. This new expansion is called Markov chains for sets. Unlike traditional MC, the size of the state space is $2^{|L|}$.
+Figure \ref{fig:MCSets} shows an MC for sets. There are three different locations of interest $home$, $cafe$, and $school$. 
+These would be the states in a traditional MC model. In an MC for sets, we have 7 non-empty subsets such as $\{home,school\}, \{school\}$, etc.
+The extended transition matrix for our expanded set of states rapidly becomes too large to be manageable. 
+MC for sets deal with this by estimating a per-location transition matrix that can be used to calculate the probabilities of the extended transition matrix.  
+This per-location matrix is estimated using observed transitions. 
+Rendle et al. \cite{Rendle:2010:FPM} refer to it as a transition matrix, but it is something a little bit different.
+
+It is easier to understand with an example. 
+There are two observed transitions in figure \ref{fig:MCSetsM}: $\{home,school\}$ $\rightarrow$ $\{home,cafe\}$ and 
+$\{home,cafe\} \rightarrow \{school\}$.  
+Let us call the location associated with a row \emph{start-location} and the location associated with a column \emph{end-location}. 
+An entry in our per-location transition matrix is calculated by dividing the number of transitions containing the given \emph{start-location} and 
+\emph{end-location}, by the total number of transitions containing the start-location. 
+This final number is indicated in \ref{fig:MCSetsM} by the \# column.  
+For example, we put a 2 in the column for the row $home$ since 2 transitions start with a set containing $home$. 
+This number is then the denominator in all the fractions of the per-location transition matrix. 
+There is only 1 transition that has a set containing $home$ that ends in a set containing $school$, 
+so the entry for $home \rightarrow school$ is $1/2$.  
 This represents the probability that a state containing $home$ will transition to a state containing $school$.
 
 As illustrated in the examples above, we can imagine Markov chains are directly applied to 
@@ -205,12 +212,11 @@ incorporate enough features for precise predictions. Koren et al. \cite{Koren:20
 increasing the size of $f$ results in more precise predictions.
 \end{itemize}
 
-For estimating the factors efficiently, Bayesian personalized ranking (BPR) can be used in MF. 
-When representing the observed data $R$, 
-BPR creates a matrix of item pairs for each user. These pairwise relationships built-in BPR allow the system 
-to optimize for the task of ranking different locations. To apply BPR to Markov chains for sets, 
-sequential BPR is used in POI recommendation methods that we will discuss in the following sections.
-For more details of BPR, see \cite{Rendle:2009:BBP}.
+The factors can be estimated using machine learning techniques.
+Rendle et al. \cite{Rendle:2009:BBP} use a technique known as Bayesian personalized ranking (BPR) that attempts 
+to produce factors that will be useful for providing a personalized ranking for those locations. 
+To apply BPR to Markov chains for sets, sequential BPR (S-BPR) is used. 
+The details of BPR and S-BPR are beyond the scope of this paper. For more details see \cite{Rendle:2009:BBP}.
 
 \textbf{Tensor.} From our point of view, a tensor is a multidimensional array in any programming language.
 The rank of the tensor is then the number of components needed to specify an entry in the array. 
@@ -271,7 +277,7 @@ In section \ref{sec:introduction}, we mentioned sequential information plays a h
 in that there is a strong connection between users' recently visited locations and future locations. 
 Imagine a POI recommendation system with no sequential awareness. 
 It may recommend a family restaurant to a user who just checked into a restaurant; this is not ideal. 
-To take advantage of these two complementary models, MC and MF, Rendle et al. \cite{Rendle:2010:FPM} proposes FPMC.
+To take advantage of these two complementary models, MC and MF, Rendle et al. \cite{Rendle:2010:FPM} propose FPMC.
 
 First, let us think about what kind of recommendation model we aim to build. 
 We want a recommendation system that is aware of sequential pattern and personalized for each user.
